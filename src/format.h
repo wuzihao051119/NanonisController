@@ -52,7 +52,7 @@ void appendSingleType(std::ostream &os, std::vector<T> &arg) {
     appendSingleType(os, arg);
 }
 
-template <typename T>
+template <typename T, typename = void>
 T convertTo(std::string &str) {
     return str;
 }

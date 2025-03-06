@@ -16,8 +16,7 @@ public:
     Function(std::ostream &os) : m_os(os) {}
     std::ostream &stream() const { return m_os; }
 
-    AddBiasFunctions;
-    AddBiasSwpFunctions;
+    AddWholeFunctions;
 
 private:
     std::ostream &m_os;
