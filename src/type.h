@@ -5,9 +5,6 @@
 #include <string>
 #include <vector>
 
-#define ResponseBackTrue (nano_unsigned_int16)1
-#define ResponseBackFalse (nano_unsigned_int16)0
-
 typedef std::string nano_string;
 typedef std::int32_t nano_int;
 typedef std::uint16_t nano_unsigned_int16;

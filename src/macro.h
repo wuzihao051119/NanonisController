@@ -4,8 +4,15 @@
 #include <vector>
 #include <string>
 
-#define AddCommand(Module, Function) command.emplace(#Module "." #Function, Module::Function)
-#define AddFunction(Module, Function) static std::string &Function(std::vector<std::string> &args)
+#define ResponseBackTrue (nano_unsigned_int16)1
+#define ResponseBackFalse (nano_unsigned_int16)0
+
+#define AddCommand(Module, Func) \
+    m_command.emplace(#Module "." #Func, std::bind(&Function::Module##Func, &m_function, std::placeholders::_1));
+#define AddFunction(Module, Func, ...) \
+    inline void Module##Func(std::vector<std::string> &args) { \
+        appendArgs<__VA_ARGS__ __VA_OPT__(,) void>(m_os, args); \
+    }
 
 #define AddCommands \
     AddCommand(Bias, Set); \
@@ -18,530 +25,530 @@
     AddCommand(BiasSwp, Open); \
     AddCommand(BiasSwp, Start); \
     AddCommand(BiasSwp, PropsSet); \
-    AddCommand(BiasSwp, LimitsSet); \
-    AddCommand(BiasSpectr, PropsGet); \
-    AddCommand(BiasSpectr, AdvPropsSet); \
-    AddCommand(BiasSpectr, AdvPropsGet); \
-    AddCommand(BiasSpectr, LimitsSet); \
-    AddCommand(BiasSpectr, LimitsGet); \
-    AddCommand(BiasSpectr, TimingSet); \
-    AddCommand(BiasSpectr, TimingGet); \
-    AddCommand(BiasSpectr, TTLSyncSet); \
-    AddCommand(BiasSpectr, TTLSyncGet); \
-    AddCommand(BiasSpectr, AltZCtrlSet); \
-    AddCommand(BiasSpectr, AltZCtrlGet); \
-    AddCommand(BiasSpectr, MLSLockinPerSegSet); \
-    AddCommand(BiasSpectr, MLSLockinPerSegGet); \
-    AddCommand(BiasSpectr, MLSModeSet); \
-    AddCommand(BiasSpectr, MLSModeGet); \
-    AddCommand(BiasSpectr, MLSValsSet); \
-    AddCommand(BiasSpectr, MLSValsGet); \
-    AddCommand(KelvinCtrl, CtrlOnOffSet); \
-    AddCommand(KelvinCtrl, CtrlOnOffGet); \
-    AddCommand(KelvinCtrl, SetpntSet); \
-    AddCommand(KelvinCtrl, SetpntGet); \
-    AddCommand(KelvinCtrl, GainSet); \
-    AddCommand(KelvinCtrl, GainGet); \
-    AddCommand(KelvinCtrl, ModParamsSet); \
-    AddCommand(KelvinCtrl, ModParamsGet); \
-    AddCommand(KelvinCtrl, ModOnOffSet); \
-    AddCommand(KelvinCtrl, ModOnOffGet); \
-    AddCommand(KelvinCtrl, CtrlSignalSet); \
-    AddCommand(KelvinCtrl, CtrlSignalGet); \
-    AddCommand(KelvinCtrl, AmpGet); \
-    AddCommand(KelvinCtrl, BiasLimitsSet); \
-    AddCommand(KelvinCtrl, BiasLimitsGet); \
-    AddCommand(PDComp, Open); \
-    AddCommand(PDComp, Close); \
-    AddCommand(PDComp, ParamsSet); \
-    AddCommand(PDComp, ParamsGet); \
-    AddCommand(PDComp, DataGet); \
-    AddCommand(Current, Get); \
-    AddCommand(Current, Get100); \
-    AddCommand(Current, BEEMGet); \
-    AddCommand(Current, GainSet); \
-    AddCommand(Current, GainsGet); \
-    AddCommand(Current, CalibrSet); \
-    AddCommand(Current, CalibrGet); \
-    AddCommand(ZCtrl, ZPosSet); \
-    AddCommand(ZCtrl, ZPosGet); \
-    AddCommand(ZCtrl, OnOffSet); \
-    AddCommand(ZCtrl, OnOffGet); \
-    AddCommand(ZCtrl, SetpntSet); \
-    AddCommand(ZCtrl, SetpntGet); \
-    AddCommand(ZCtrl, GainSet); \
-    AddCommand(ZCtrl, GainGet); \
-    AddCommand(ZCtrl, SwitchOffDelaySet); \
-    AddCommand(ZCtrl, SwitchOffDelayGet); \
-    AddCommand(ZCtrl, TipLiftSet); \
-    AddCommand(ZCtrl, TipLiftGet); \
-    AddCommand(ZCtrl, Home); \
-    AddCommand(ZCtrl, HomePropsSet); \
-    AddCommand(ZCtrl, HomePropsGet); \
-    AddCommand(ZCtrl, ActiveCtrlSet); \
-    AddCommand(ZCtrl, CtrlListGet); \
-    AddCommand(ZCtrl, Withdraw); \
-    AddCommand(ZCtrl, WithdrawRateSet); \
-    AddCommand(ZCtrl, WithdrawRateGet); \
-    AddCommand(ZCtrl, LimitsEnabledSet); \
-    AddCommand(ZCtrl, LimitsEnabledGet); \
-    AddCommand(ZCtrl, LimitsSet); \
-    AddCommand(ZCtrl, LimitsGet); \
-    AddCommand(ZCtrl, StatusGet); \
-    AddCommand(SafeTip, OnOffSet); \
-    AddCommand(SafeTip, OnOffGet); \
-    AddCommand(SafeTip, SignalGet); \
-    AddCommand(SafeTip, PropsSet); \
-    AddCommand(SafeTip, PropsGet); \
-    AddCommand(AutoApproach, Open); \
-    AddCommand(AutoApproach, OnOffSet); \
-    AddCommand(AutoApproach, OnOffGet); \
-    AddCommand(ZSpectr, Open); \
-    AddCommand(ZSpectr, Start); \
-    AddCommand(ZSpectr, Stop); \
-    AddCommand(ZSpectr, StatusGet); \
-    AddCommand(ZSpectr, ChsSet); \
-    AddCommand(ZSpectr, ChsGet); \
-    AddCommand(ZSpectr, PropsSet); \
-    AddCommand(ZSpectr, PropsGet); \
-    AddCommand(ZSpectr, AdvPropsSet); \
-    AddCommand(ZSpectr, AdvPropsGet); \
-    AddCommand(ZSpectr, RangeSet); \
-    AddCommand(ZSpectr, RangeGet); \
-    AddCommand(ZSpectr, TimingSet); \
-    AddCommand(ZSpectr, TimingGet); \
-    AddCommand(ZSpectr, RetractDelaySet); \
-    AddCommand(ZSpectr, RetractDelayGet); \
-    AddCommand(ZSpectr, RetractSet); \
-    AddCommand(ZSpectr, RetractGet); \
-    AddCommand(ZSpectr, Retract2ndSet); \
-    AddCommand(ZSpectr, Retract2ndGet); \
-    AddCommand(Piezo, TiltSet); \
-    AddCommand(Piezo, TiltGet); \
-    AddCommand(Piezo, RangeSet); \
-    AddCommand(Piezo, RangeGet); \
-    AddCommand(Piezo, SensSet); \
-    AddCommand(Piezo, SensGet); \
-    AddCommand(Piezo, DriftCompSet); \
-    AddCommand(Piezo, DriftCompGet); \
-    AddCommand(Piezo, CalibrGet); \
-    AddCommand(Piezo, HVAInfoGet); \
-    AddCommand(Piezo, HVAStatusLEDGet); \
-    AddCommand(Scan, Action); \
-    AddCommand(Scan, StatusGet); \
-    AddCommand(Scan, WaitEndOfScan); \
-    AddCommand(Scan, FrameSet); \
-    AddCommand(Scan, FrameGet); \
-    AddCommand(Scan, BufferSet); \
-    AddCommand(Scan, BufferGet); \
-    AddCommand(Scan, PropsSet); \
-    AddCommand(Scan, PropsGet); \
-    AddCommand(Scan, SpeedSet); \
-    AddCommand(Scan, SpeedGet); \
-    AddCommand(Scan, FrameDataGrab); \
-    AddCommand(FolMe, XYPosSet); \
-    AddCommand(FolMe, XYPosGet); \
-    AddCommand(FolMe, SpeedSet); \
-    AddCommand(FolMe, SpeedGet); \
-    AddCommand(FolMe, OversamplSet); \
-    AddCommand(FolMe, OversamplGet); \
-    AddCommand(FolMe, Stop); \
-    AddCommand(FolMe, PSOnOffGet); \
-    AddCommand(FolMe, PSOnOffSet); \
-    AddCommand(FolMe, PSExpGet); \
-    AddCommand(FolMe, PSExpSet); \
-    AddCommand(FolMe, PSPropsGet); \
-    AddCommand(FolMe, PSPropsSet); \
-    AddCommand(TipRec, BufferSizeSet); \
-    AddCommand(TipRec, BufferSizeGet); \
-    AddCommand(TipRec, BufferClear); \
-    AddCommand(TipRec, DataGet); \
-    AddCommand(TipRec, DataSave); \
-    AddCommand(Pattern, ExpOpen); \
-    AddCommand(Pattern, ExpStart); \
-    AddCommand(Pattern, ExpPause); \
-    AddCommand(Pattern, ExpStop); \
-    AddCommand(Pattern, ExpStatusGet); \
-    AddCommand(Pattern, GridSet); \
-    AddCommand(Pattern, GridGet); \
-    AddCommand(Pattern, LineSet); \
-    AddCommand(Pattern, LineGet); \
-    AddCommand(Pattern, CloudSet); \
-    AddCommand(Pattern, CloudGet); \
-    AddCommand(Pattern, PropsSet); \
-    AddCommand(Pattern, PropsGet); \
-    AddCommand(Marks, PointDraw); \
-    AddCommand(Marks, PointsDraw); \
-    AddCommand(Marks, LineDraw); \
-    AddCommand(Marks, LinesDraw); \
-    AddCommand(Marks, PointsErase); \
-    AddCommand(Marks, LinesErase); \
-    AddCommand(Marks, PointsVisibleSet); \
-    AddCommand(Marks, LinesVisibleSet); \
-    AddCommand(Marks, PointsGet); \
-    AddCommand(Marks, LinesGet); \
-    AddCommand(TipShaper, Start); \
-    AddCommand(TipShaper, PropsSet); \
-    AddCommand(TipShaper, PropsGet); \
-    AddCommand(Motor, StartMove); \
-    AddCommand(Motor, StartClosedLoop); \
-    AddCommand(Motor, StopMove); \
-    AddCommand(Motor, PosGet); \
-    AddCommand(Motor, StepCounterGet); \
-    AddCommand(Motor, FreqAmpGet); \
-    AddCommand(Motor, FreqAmpSet); \
-    AddCommand(GenSwp, AcqChsSet); \
-    AddCommand(GenSwp, AcqChsGet); \
-    AddCommand(GenSwp, SwpSignalSet); \
-    AddCommand(GenSwp, SwpSignalGet); \
-    AddCommand(GenSwp, LimitsSet); \
-    AddCommand(GenSwp, LimitsGet); \
-    AddCommand(GenSwp, PropsSet); \
-    AddCommand(GenSwp, PropsGet); \
-    AddCommand(GenSwp, Start); \
-    AddCommand(GenSwp, Stop); \
-    AddCommand(GenSwp, Open); \
-    AddCommand(GenPICtrl, OnOffSet); \
-    AddCommand(GenPICtrl, OnOffGet); \
-    AddCommand(GenPICtrl, AOValSet); \
-    AddCommand(GenPICtrl, AOValGet); \
-    AddCommand(GenPICtrl, AOPropsSet); \
-    AddCommand(GenPICtrl, AOPropsGet); \
-    AddCommand(GenPICtrl, ModChSet); \
-    AddCommand(GenPICtrl, ModChGet); \
-    AddCommand(GenPICtrl, DemodChSet); \
-    AddCommand(GenPICtrl, DemodChGet); \
-    AddCommand(GenPICtrl, PropsSet); \
-    AddCommand(GenPICtrl, PropsGet); \
-    AddCommand(AtomTrack, CtrlSet); \
-    AddCommand(AtomTrack, StatusGet); \
-    AddCommand(AtomTrack, PropsSet); \
-    AddCommand(AtomTrack, PropsGet); \
-    AddCommand(AtomTrack, QuickCompStart); \
-    AddCommand(AtomTrack, DriftComp); \
-    AddCommand(LockIn, ModOnOffSet); \
-    AddCommand(LockIn, ModOnOffGet); \
-    AddCommand(LockIn, ModSignalSet); \
-    AddCommand(LockIn, ModSignalGet); \
-    AddCommand(LockIn, ModPhasRegSet); \
-    AddCommand(LockIn, ModPhasRegGet); \
-    AddCommand(LockIn, ModHarmonicSet); \
-    AddCommand(LockIn, ModHarmonicGet); \
-    AddCommand(LockIn, ModPhasSet); \
-    AddCommand(LockIn, ModPhasGet); \
-    AddCommand(LockIn, ModAmpSet); \
-    AddCommand(LockIn, ModAmpGet); \
-    AddCommand(LockIn, ModPhasFreqSet); \
-    AddCommand(LockIn, ModPhasFreqGet); \
-    AddCommand(LockIn, DemodSignalSet); \
-    AddCommand(LockIn, DemodSignalGet); \
-    AddCommand(LockIn, DemodHarmonicSet); \
-    AddCommand(LockIn, DemodHarmonicGet); \
-    AddCommand(LockIn, DemodHPFilterSet); \
-    AddCommand(LockIn, DemodHPFilterGet); \
-    AddCommand(LockIn, DemodLPFilterSet); \
-    AddCommand(LockIn, DemodLPFilterGet); \
-    AddCommand(LockIn, DemodPhasRegSet); \
-    AddCommand(LockIn, DemodPhasRegGet); \
-    AddCommand(LockIn, DemodPhasSet); \
-    AddCommand(LockIn, DemodPhasGet); \
-    AddCommand(LockIn, DemodSyncFilterSet); \
-    AddCommand(LockIn, DemodSyncFilterGet); \
-    AddCommand(LockIn, DemodRTSignalsSet); \
-    AddCommand(LockIn, DemodRTSignalsGet); \
-    AddCommand(LockInFreqSwp, Open); \
-    AddCommand(LockInFreqSwp, Start); \
-    AddCommand(LockInFreqSwp, SignalSet); \
-    AddCommand(LockInFreqSwp, SignalGet); \
-    AddCommand(LockInFreqSwp, LimitsSet); \
-    AddCommand(LockInFreqSwp, LimitsGet); \
-    AddCommand(LockInFreqSwp, PropsSet); \
-    AddCommand(LockInFreqSwp, PropsGet); \
-    AddCommand(PLL, InpCalibrSet); \
-    AddCommand(PLL, InpCalibrGet); \
-    AddCommand(PLL, InpRangeSet); \
-    AddCommand(PLL, InpRangeGet); \
-    AddCommand(PLL, InpPropsSet); \
-    AddCommand(PLL, InpPropsGet); \
-    AddCommand(PLL, AddOnOffSet); \
-    AddCommand(PLL, AddOnOffGet); \
-    AddCommand(PLL, OutOnOffSet); \
-    AddCommand(PLL, OutOnOffGet); \
-    AddCommand(PLL, ExcRangeSet); \
-    AddCommand(PLL, ExcRangeGet); \
-    AddCommand(PLL, ExcitationSet); \
-    AddCommand(PLL, ExcitationGet); \
-    AddCommand(PLL, AmpCtrlSetpntSet); \
-    AddCommand(PLL, AmpCtrlSetpntGet); \
-    AddCommand(PLL, AmpCtrlOnOffSet); \
-    AddCommand(PLL, AmpCtrlOnOffGet); \
-    AddCommand(PLL, AmpCtrlGainSet); \
-    AddCommand(PLL, AmpCtrlGainGet); \
-    AddCommand(PLL, AmpCtrlBandwidthSet); \
-    AddCommand(PLL, AmpCtrlBandwidthGet); \
-    AddCommand(PLL, PhasCtrlOnOffSet); \
-    AddCommand(PLL, PhasCtrlOnOffGet); \
-    AddCommand(PLL, PhasCtrlGainSet); \
-    AddCommand(PLL, PhasCtrlGainGet); \
-    AddCommand(PLL, PhasCtrlBandwidthSet); \
-    AddCommand(PLL, PhasCtrlBandwidthGet); \
-    AddCommand(PLL, FreqRangeSet); \
-    AddCommand(PLL, FreqRangeGet); \
-    AddCommand(PLL, CenterFreqSet); \
-    AddCommand(PLL, CenterFreqGet); \
-    AddCommand(PLL, FreqShiftSet); \
-    AddCommand(PLL, FreqShiftGet); \
-    AddCommand(PLL, FreqShiftAutoCenter); \
-    AddCommand(PLL, FreqExcOverwriteSet); \
-    AddCommand(PLL, FreqExcOverwriteGet); \
-    AddCommand(PLL, DemodInputSet); \
-    AddCommand(PLL, DemodInputGet); \
-    AddCommand(PLL, DemodHarmonicSet); \
-    AddCommand(PLL, DemodHarmonicGet); \
-    AddCommand(PLL, DemodPhasRefSet); \
-    AddCommand(PLL, DemodPhasRefGet); \
-    AddCommand(PLL, DemodFilterSet); \
-    AddCommand(PLL, DemodFilterGet); \
-    AddCommand(PLLQCtrl, AccessRequest); \
-    AddCommand(PLLQCtrl, AccessGet); \
-    AddCommand(PLLQCtrl, OnOffSet); \
-    AddCommand(PLLQCtrl, OnOffGet); \
-    AddCommand(PLLQCtrl, QGainSet); \
-    AddCommand(PLLQCtrl, QGainGet); \
-    AddCommand(PLLQCtrl, PhaseSet); \
-    AddCommand(PLLQCtrl, PhaseGet); \
-    AddCommand(PLLFreqSwp, Open); \
-    AddCommand(PLLFreqSwp, ParamsSet); \
-    AddCommand(PLLFreqSwp, ParamsGet); \
-    AddCommand(PLLFreqSwp, Start); \
-    AddCommand(PLLFreqSwp, Stop); \
-    AddCommand(PLLPhasSwp, Start); \
-    AddCommand(PLLPhasSwp, Stop); \
-    AddCommand(PLLSignalAnlzr, Open); \
-    AddCommand(PLLSignalAnlzr, ChSet); \
-    AddCommand(PLLSignalAnlzr, ChGet); \
-    AddCommand(PLLSignalAnlzr, TimebaseSet); \
-    AddCommand(PLLSignalAnlzr, TimebaseGet); \
-    AddCommand(PLLSignalAnlzr, TrigAuto); \
-    AddCommand(PLLSignalAnlzr, TrigRearm); \
-    AddCommand(PLLSignalAnlzr, TrigSet); \
-    AddCommand(PLLSignalAnlzr, TrigGet); \
-    AddCommand(PLLSignalAnlzr, OsciDataGet); \
-    AddCommand(PLLSignalAnlzr, FFTPropsSet); \
-    AddCommand(PLLSignalAnlzr, FFTPropsGet); \
-    AddCommand(PLLSignalAnlzr, FFTAvgRestart); \
-    AddCommand(PLLSignalAnlzr, FFTDataGet); \
-    AddCommand(PLLZoomFFT, Open); \
-    AddCommand(PLLZoomFFT, ChSet); \
-    AddCommand(PLLZoomFFT, ChGet); \
-    AddCommand(PLLZoomFFT, AvgRestart); \
-    AddCommand(PLLZoomFFT, PropsSet); \
-    AddCommand(PLLZoomFFT, PropsGet); \
-    AddCommand(PLLZoomFFT, DataGet); \
-    AddCommand(OCSync, AnglesSet); \
-    AddCommand(OCSync, AnglesGet); \
-    AddCommand(OCSync, LinkAnglesSet); \
-    AddCommand(OCSync, LinkAnglesGet); \
-    AddCommand(Script, Load); \
-    AddCommand(Script, Save); \
-    AddCommand(Script, Deploy); \
-    AddCommand(Script, Undeploy); \
-    AddCommand(Script, Run); \
-    AddCommand(Script, Stop); \
-    AddCommand(Script, ChsGet); \
-    AddCommand(Script, ChsSet); \
-    AddCommand(Script, DataGet); \
-    AddCommand(Script, Autosave); \
-    AddCommand(Interf, CtrlOnOffSet); \
-    AddCommand(Interf, CtrlOnOffGet); \
-    AddCommand(Interf, CtrlPropsSet); \
-    AddCommand(Interf, CtrlPropsGet); \
-    AddCommand(Interf, WPiezoSet); \
-    AddCommand(Interf, WPiezoGet); \
-    AddCommand(Interf, ValGet); \
-    AddCommand(Interf, CtrlCalibrOpen); \
-    AddCommand(Interf, CtrlReset); \
-    AddCommand(Interf, CtrlNullDefl); \
-    AddCommand(Laser, OnOffSet); \
-    AddCommand(Laser, OnOffGet); \
-    AddCommand(Laser, PropsSet); \
-    AddCommand(Laser, PropsGet); \
-    AddCommand(Laser, PowerGet); \
-    AddCommand(BeamDefl, HorConfigSet); \
-    AddCommand(BeamDefl, HorConfigGet); \
-    AddCommand(BeamDefl, VerConfigSet); \
-    AddCommand(BeamDefl, VerConfigGet); \
-    AddCommand(BeamDefl, IntConfigSet); \
-    AddCommand(BeamDefl, IntConfigGet); \
-    AddCommand(BeamDefl, AutoOffset); \
-    AddCommand(Signals, NamesGet); \
-    AddCommand(Signals, InSlotSet); \
-    AddCommand(Signals, InSlotsGet); \
-    AddCommand(Signals, CalibrGet); \
-    AddCommand(Signals, RangeGet); \
-    AddCommand(Signals, ValGet); \
-    AddCommand(Signals, ValsGet); \
-    AddCommand(Signals, MeasNamesGet); \
-    AddCommand(Signals, AddRTGet); \
-    AddCommand(Signals, AddRTSet); \
-    AddCommand(UserIn, CalibrSet); \
-    AddCommand(UserOut, ModeSet); \
-    AddCommand(UserOut, ModeGet); \
-    AddCommand(UserOut, MonitorChSet); \
-    AddCommand(UserOut, MonitorChGet); \
-    AddCommand(UserOut, ValSet); \
-    AddCommand(UserOut, CalibrSet); \
-    AddCommand(UserOut, CalcSignalNameSet); \
-    AddCommand(UserOut, CalcSignalNameGet); \
-    AddCommand(UserOut, CalcSignalConfigSet); \
-    AddCommand(UserOut, CalcSignalConfigGet); \
-    AddCommand(UserOut, LimitsSet); \
-    AddCommand(UserOut, LimitsGet); \
-    AddCommand(DigLines, PropsSet); \
-    AddCommand(DigLines, OutStatusSet); \
-    AddCommand(DigLines, TTLValGet); \
-    AddCommand(DigLines, Pulse); \
-    AddCommand(DataLog, Open); \
-    AddCommand(DataLog, Start); \
-    AddCommand(DataLog, Stop); \
-    AddCommand(DataLog, StatusGet); \
-    AddCommand(DataLog, ChsSet); \
-    AddCommand(DataLog, ChsGet); \
-    AddCommand(DataLog, PropsSet); \
-    AddCommand(DataLog, PropsGet); \
-    AddCommand(TCPLog, Start); \
-    AddCommand(TCPLog, Stop); \
-    AddCommand(TCPLog, ChsSet); \
-    AddCommand(TCPLog, OversamplSet); \
-    AddCommand(TCPLog, StatusGet); \
-    AddCommand(OsciHR, ChSet); \
-    AddCommand(OsciHR, ChGet); \
-    AddCommand(OsciHR, OversamplSet); \
-    AddCommand(OsciHR, OversamplGet); \
-    AddCommand(OsciHR, CalibrModeSet); \
-    AddCommand(OsciHR, CalibrModeGet); \
-    AddCommand(OsciHR, SamplesSet); \
-    AddCommand(OsciHR, SamplesGet); \
-    AddCommand(OsciHR, PreTrigSet); \
-    AddCommand(OsciHR, PreTrigGet); \
-    AddCommand(OsciHR, Run); \
-    AddCommand(OsciHR, OsciDataGet); \
-    AddCommand(OsciHR, TrigModeSet); \
-    AddCommand(OsciHR, TrigModeGet); \
-    AddCommand(OsciHR, TrigLevChSet); \
-    AddCommand(OsciHR, TrigLevChGet); \
-    AddCommand(OsciHR, TrigLevValSet); \
-    AddCommand(OsciHR, TrigLevValGet); \
-    AddCommand(OsciHR, TrigLevHystSet); \
-    AddCommand(OsciHR, TrigLevHystGet); \
-    AddCommand(OsciHR, TrigLevSlopeSet); \
-    AddCommand(OsciHR, TrigLevSlopeGet); \
-    AddCommand(OsciHR, TrigDigChSet); \
-    AddCommand(OsciHR, TrigDigChGet); \
-    AddCommand(OsciHR, TrigArmModeSet); \
-    AddCommand(OsciHR, TrigArmModeGet); \
-    AddCommand(OsciHR, TrigDigSlopeSet); \
-    AddCommand(OsciHR, TrigDigSlopeGet); \
-    AddCommand(OsciHR, TrigRearm); \
-    AddCommand(OsciHR, PSDShow); \
-    AddCommand(OsciHR, PSDWeightSet); \
-    AddCommand(OsciHR, PSDWeightGet); \
-    AddCommand(OsciHR, PSDWindowSet); \
-    AddCommand(OsciHR, PSDWindowGet); \
-    AddCommand(OsciHR, PSDAvrgTypeSet); \
-    AddCommand(OsciHR, PSDAvrgTypeGet); \
-    AddCommand(OsciHR, PSDAvrgCountSet); \
-    AddCommand(OsciHR, PSDAvrgCountGet); \
-    AddCommand(OsciHR, PSDAvrgRestart); \
-    AddCommand(OsciHR, PSDDataGet); \
-    AddCommand(Osci1T, ChSet); \
-    AddCommand(Osci1T, ChGet); \
-    AddCommand(Osci1T, TimebaseSet); \
-    AddCommand(Osci1T, TimebaseGet); \
-    AddCommand(Osci1T, TrigSet); \
-    AddCommand(Osci1T, TrigGet); \
-    AddCommand(Osci1T, Run); \
-    AddCommand(Osci1T, DataGet); \
-    AddCommand(Osci2T, ChsSet); \
-    AddCommand(Osci2T, ChsGet); \
-    AddCommand(Osci2T, TimebaseSet); \
-    AddCommand(Osci2T, TimebaseGet); \
-    AddCommand(Osci2T, OversamplSet); \
-    AddCommand(Osci2T, OversamplGet); \
-    AddCommand(Osci2T, TrigSet); \
-    AddCommand(Osci2T, TrigGet); \
-    AddCommand(Osci2T, Run); \
-    AddCommand(Osci2T, DataGet); \
-    AddCommand(SignalChart, Open); \
-    AddCommand(SignalChart, ChsSet); \
-    AddCommand(SignalChart, ChsGet); \
-    AddCommand(SpectrumAnlzr, ChSet); \
-    AddCommand(SpectrumAnlzr, ChGet); \
-    AddCommand(SpectrumAnlzr, FreqRangeSet); \
-    AddCommand(SpectrumAnlzr, FreqRangeGet); \
-    AddCommand(SpectrumAnlzr, FreqResSet); \
-    AddCommand(SpectrumAnlzr, FreqResGet); \
-    AddCommand(SpectrumAnlzr, FFTWindowSet); \
-    AddCommand(SpectrumAnlzr, FFTWindowGet); \
-    AddCommand(SpectrumAnlzr, AveragSet); \
-    AddCommand(SpectrumAnlzr, AveragGet); \
-    AddCommand(SpectrumAnlzr, ACCouplingSet); \
-    AddCommand(SpectrumAnlzr, ACCouplingGet); \
-    AddCommand(SpectrumAnlzr, CursorPosSet); \
-    AddCommand(SpectrumAnlzr, CursorPosGet); \
-    AddCommand(SpectrumAnlzr, BandRMSGet); \
-    AddCommand(SpectrumAnlzr, DCGet); \
-    AddCommand(SpectrumAnlzr, Run); \
-    AddCommand(SpectrumAnlzr, DataGet); \
-    AddCommand(FunGen1Ch, Start); \
-    AddCommand(FunGen1Ch, Stop); \
-    AddCommand(FunGen1Ch, StatusGet); \
-    AddCommand(FunGen1Ch, PropsSet); \
-    AddCommand(FunGen1Ch, PropsGet); \
-    AddCommand(FunGen1Ch, IdleSet); \
-    AddCommand(FunGen1Ch, IdleGet); \
-    AddCommand(FunGen2Ch, Start); \
-    AddCommand(FunGen2Ch, Stop); \
-    AddCommand(FunGen2Ch, StatusGet); \
-    AddCommand(FunGen2Ch, IdleSet); \
-    AddCommand(FunGen2Ch, IdleGet); \
-    AddCommand(FunGen2Ch, OnOffSet); \
-    AddCommand(FunGen2Ch, OnOffGet); \
-    AddCommand(FunGen2Ch, SignalSet); \
-    AddCommand(FunGen2Ch, SignalGet); \
-    AddCommand(FunGen2Ch, PropsSet); \
-    AddCommand(FunGen2Ch, PropsGet); \
-    AddCommand(FunGen2Ch, WaveformSet); \
-    AddCommand(FunGen2Ch, WaveformGet); \
-    AddCommand(Util, SessionPathGet); \
-    AddCommand(Util, SettingsLoad); \
-    AddCommand(Util, SettingsSave); \
-    AddCommand(Util, LayoutLoad); \
-    AddCommand(Util, LayoutSave); \
-    AddCommand(Util, Lock); \
-    AddCommand(Util, UnLock); \
-    AddCommand(Util, RTFreqSet); \
-    AddCommand(Util, RTFreqGet); \
-    AddCommand(Util, AcqPeriodSet); \
-    AddCommand(Util, AcqPeriodGet); \
-    AddCommand(Util, RTOversamplSet); \
-    AddCommand(Util, RTOversamplGet); \
-    AddCommand(Util, Quit);    
+    AddCommand(BiasSwp, LimitsSet);
+    // AddCommand(BiasSpectr, PropsGet); \
+    // AddCommand(BiasSpectr, AdvPropsSet); \
+    // AddCommand(BiasSpectr, AdvPropsGet); \
+    // AddCommand(BiasSpectr, LimitsSet); \
+    // AddCommand(BiasSpectr, LimitsGet); \
+    // AddCommand(BiasSpectr, TimingSet); \
+    // AddCommand(BiasSpectr, TimingGet); \
+    // AddCommand(BiasSpectr, TTLSyncSet); \
+    // AddCommand(BiasSpectr, TTLSyncGet); \
+    // AddCommand(BiasSpectr, AltZCtrlSet); \
+    // AddCommand(BiasSpectr, AltZCtrlGet); \
+    // AddCommand(BiasSpectr, MLSLockinPerSegSet); \
+    // AddCommand(BiasSpectr, MLSLockinPerSegGet); \
+    // AddCommand(BiasSpectr, MLSModeSet); \
+    // AddCommand(BiasSpectr, MLSModeGet); \
+    // AddCommand(BiasSpectr, MLSValsSet); \
+    // AddCommand(BiasSpectr, MLSValsGet); \
+    // AddCommand(KelvinCtrl, CtrlOnOffSet); \
+    // AddCommand(KelvinCtrl, CtrlOnOffGet); \
+    // AddCommand(KelvinCtrl, SetpntSet); \
+    // AddCommand(KelvinCtrl, SetpntGet); \
+    // AddCommand(KelvinCtrl, GainSet); \
+    // AddCommand(KelvinCtrl, GainGet); \
+    // AddCommand(KelvinCtrl, ModParamsSet); \
+    // AddCommand(KelvinCtrl, ModParamsGet); \
+    // AddCommand(KelvinCtrl, ModOnOffSet); \
+    // AddCommand(KelvinCtrl, ModOnOffGet); \
+    // AddCommand(KelvinCtrl, CtrlSignalSet); \
+    // AddCommand(KelvinCtrl, CtrlSignalGet); \
+    // AddCommand(KelvinCtrl, AmpGet); \
+    // AddCommand(KelvinCtrl, BiasLimitsSet); \
+    // AddCommand(KelvinCtrl, BiasLimitsGet); \
+    // AddCommand(PDComp, Open); \
+    // AddCommand(PDComp, Close); \
+    // AddCommand(PDComp, ParamsSet); \
+    // AddCommand(PDComp, ParamsGet); \
+    // AddCommand(PDComp, DataGet); \
+    // AddCommand(Current, Get); \
+    // AddCommand(Current, Get100); \
+    // AddCommand(Current, BEEMGet); \
+    // AddCommand(Current, GainSet); \
+    // AddCommand(Current, GainsGet); \
+    // AddCommand(Current, CalibrSet); \
+    // AddCommand(Current, CalibrGet); \
+    // AddCommand(ZCtrl, ZPosSet); \
+    // AddCommand(ZCtrl, ZPosGet); \
+    // AddCommand(ZCtrl, OnOffSet); \
+    // AddCommand(ZCtrl, OnOffGet); \
+    // AddCommand(ZCtrl, SetpntSet); \
+    // AddCommand(ZCtrl, SetpntGet); \
+    // AddCommand(ZCtrl, GainSet); \
+    // AddCommand(ZCtrl, GainGet); \
+    // AddCommand(ZCtrl, SwitchOffDelaySet); \
+    // AddCommand(ZCtrl, SwitchOffDelayGet); \
+    // AddCommand(ZCtrl, TipLiftSet); \
+    // AddCommand(ZCtrl, TipLiftGet); \
+    // AddCommand(ZCtrl, Home); \
+    // AddCommand(ZCtrl, HomePropsSet); \
+    // AddCommand(ZCtrl, HomePropsGet); \
+    // AddCommand(ZCtrl, ActiveCtrlSet); \
+    // AddCommand(ZCtrl, CtrlListGet); \
+    // AddCommand(ZCtrl, Withdraw); \
+    // AddCommand(ZCtrl, WithdrawRateSet); \
+    // AddCommand(ZCtrl, WithdrawRateGet); \
+    // AddCommand(ZCtrl, LimitsEnabledSet); \
+    // AddCommand(ZCtrl, LimitsEnabledGet); \
+    // AddCommand(ZCtrl, LimitsSet); \
+    // AddCommand(ZCtrl, LimitsGet); \
+    // AddCommand(ZCtrl, StatusGet); \
+    // AddCommand(SafeTip, OnOffSet); \
+    // AddCommand(SafeTip, OnOffGet); \
+    // AddCommand(SafeTip, SignalGet); \
+    // AddCommand(SafeTip, PropsSet); \
+    // AddCommand(SafeTip, PropsGet); \
+    // AddCommand(AutoApproach, Open); \
+    // AddCommand(AutoApproach, OnOffSet); \
+    // AddCommand(AutoApproach, OnOffGet); \
+    // AddCommand(ZSpectr, Open); \
+    // AddCommand(ZSpectr, Start); \
+    // AddCommand(ZSpectr, Stop); \
+    // AddCommand(ZSpectr, StatusGet); \
+    // AddCommand(ZSpectr, ChsSet); \
+    // AddCommand(ZSpectr, ChsGet); \
+    // AddCommand(ZSpectr, PropsSet); \
+    // AddCommand(ZSpectr, PropsGet); \
+    // AddCommand(ZSpectr, AdvPropsSet); \
+    // AddCommand(ZSpectr, AdvPropsGet); \
+    // AddCommand(ZSpectr, RangeSet); \
+    // AddCommand(ZSpectr, RangeGet); \
+    // AddCommand(ZSpectr, TimingSet); \
+    // AddCommand(ZSpectr, TimingGet); \
+    // AddCommand(ZSpectr, RetractDelaySet); \
+    // AddCommand(ZSpectr, RetractDelayGet); \
+    // AddCommand(ZSpectr, RetractSet); \
+    // AddCommand(ZSpectr, RetractGet); \
+    // AddCommand(ZSpectr, Retract2ndSet); \
+    // AddCommand(ZSpectr, Retract2ndGet); \
+    // AddCommand(Piezo, TiltSet); \
+    // AddCommand(Piezo, TiltGet); \
+    // AddCommand(Piezo, RangeSet); \
+    // AddCommand(Piezo, RangeGet); \
+    // AddCommand(Piezo, SensSet); \
+    // AddCommand(Piezo, SensGet); \
+    // AddCommand(Piezo, DriftCompSet); \
+    // AddCommand(Piezo, DriftCompGet); \
+    // AddCommand(Piezo, CalibrGet); \
+    // AddCommand(Piezo, HVAInfoGet); \
+    // AddCommand(Piezo, HVAStatusLEDGet); \
+    // AddCommand(Scan, Action); \
+    // AddCommand(Scan, StatusGet); \
+    // AddCommand(Scan, WaitEndOfScan); \
+    // AddCommand(Scan, FrameSet); \
+    // AddCommand(Scan, FrameGet); \
+    // AddCommand(Scan, BufferSet); \
+    // AddCommand(Scan, BufferGet); \
+    // AddCommand(Scan, PropsSet); \
+    // AddCommand(Scan, PropsGet); \
+    // AddCommand(Scan, SpeedSet); \
+    // AddCommand(Scan, SpeedGet); \
+    // AddCommand(Scan, FrameDataGrab); \
+    // AddCommand(FolMe, XYPosSet); \
+    // AddCommand(FolMe, XYPosGet); \
+    // AddCommand(FolMe, SpeedSet); \
+    // AddCommand(FolMe, SpeedGet); \
+    // AddCommand(FolMe, OversamplSet); \
+    // AddCommand(FolMe, OversamplGet); \
+    // AddCommand(FolMe, Stop); \
+    // AddCommand(FolMe, PSOnOffGet); \
+    // AddCommand(FolMe, PSOnOffSet); \
+    // AddCommand(FolMe, PSExpGet); \
+    // AddCommand(FolMe, PSExpSet); \
+    // AddCommand(FolMe, PSPropsGet); \
+    // AddCommand(FolMe, PSPropsSet); \
+    // AddCommand(TipRec, BufferSizeSet); \
+    // AddCommand(TipRec, BufferSizeGet); \
+    // AddCommand(TipRec, BufferClear); \
+    // AddCommand(TipRec, DataGet); \
+    // AddCommand(TipRec, DataSave); \
+    // AddCommand(Pattern, ExpOpen); \
+    // AddCommand(Pattern, ExpStart); \
+    // AddCommand(Pattern, ExpPause); \
+    // AddCommand(Pattern, ExpStop); \
+    // AddCommand(Pattern, ExpStatusGet); \
+    // AddCommand(Pattern, GridSet); \
+    // AddCommand(Pattern, GridGet); \
+    // AddCommand(Pattern, LineSet); \
+    // AddCommand(Pattern, LineGet); \
+    // AddCommand(Pattern, CloudSet); \
+    // AddCommand(Pattern, CloudGet); \
+    // AddCommand(Pattern, PropsSet); \
+    // AddCommand(Pattern, PropsGet); \
+    // AddCommand(Marks, PointDraw); \
+    // AddCommand(Marks, PointsDraw); \
+    // AddCommand(Marks, LineDraw); \
+    // AddCommand(Marks, LinesDraw); \
+    // AddCommand(Marks, PointsErase); \
+    // AddCommand(Marks, LinesErase); \
+    // AddCommand(Marks, PointsVisibleSet); \
+    // AddCommand(Marks, LinesVisibleSet); \
+    // AddCommand(Marks, PointsGet); \
+    // AddCommand(Marks, LinesGet); \
+    // AddCommand(TipShaper, Start); \
+    // AddCommand(TipShaper, PropsSet); \
+    // AddCommand(TipShaper, PropsGet); \
+    // AddCommand(Motor, StartMove); \
+    // AddCommand(Motor, StartClosedLoop); \
+    // AddCommand(Motor, StopMove); \
+    // AddCommand(Motor, PosGet); \
+    // AddCommand(Motor, StepCounterGet); \
+    // AddCommand(Motor, FreqAmpGet); \
+    // AddCommand(Motor, FreqAmpSet); \
+    // AddCommand(GenSwp, AcqChsSet); \
+    // AddCommand(GenSwp, AcqChsGet); \
+    // AddCommand(GenSwp, SwpSignalSet); \
+    // AddCommand(GenSwp, SwpSignalGet); \
+    // AddCommand(GenSwp, LimitsSet); \
+    // AddCommand(GenSwp, LimitsGet); \
+    // AddCommand(GenSwp, PropsSet); \
+    // AddCommand(GenSwp, PropsGet); \
+    // AddCommand(GenSwp, Start); \
+    // AddCommand(GenSwp, Stop); \
+    // AddCommand(GenSwp, Open); \
+    // AddCommand(GenPICtrl, OnOffSet); \
+    // AddCommand(GenPICtrl, OnOffGet); \
+    // AddCommand(GenPICtrl, AOValSet); \
+    // AddCommand(GenPICtrl, AOValGet); \
+    // AddCommand(GenPICtrl, AOPropsSet); \
+    // AddCommand(GenPICtrl, AOPropsGet); \
+    // AddCommand(GenPICtrl, ModChSet); \
+    // AddCommand(GenPICtrl, ModChGet); \
+    // AddCommand(GenPICtrl, DemodChSet); \
+    // AddCommand(GenPICtrl, DemodChGet); \
+    // AddCommand(GenPICtrl, PropsSet); \
+    // AddCommand(GenPICtrl, PropsGet); \
+    // AddCommand(AtomTrack, CtrlSet); \
+    // AddCommand(AtomTrack, StatusGet); \
+    // AddCommand(AtomTrack, PropsSet); \
+    // AddCommand(AtomTrack, PropsGet); \
+    // AddCommand(AtomTrack, QuickCompStart); \
+    // AddCommand(AtomTrack, DriftComp); \
+    // AddCommand(LockIn, ModOnOffSet); \
+    // AddCommand(LockIn, ModOnOffGet); \
+    // AddCommand(LockIn, ModSignalSet); \
+    // AddCommand(LockIn, ModSignalGet); \
+    // AddCommand(LockIn, ModPhasRegSet); \
+    // AddCommand(LockIn, ModPhasRegGet); \
+    // AddCommand(LockIn, ModHarmonicSet); \
+    // AddCommand(LockIn, ModHarmonicGet); \
+    // AddCommand(LockIn, ModPhasSet); \
+    // AddCommand(LockIn, ModPhasGet); \
+    // AddCommand(LockIn, ModAmpSet); \
+    // AddCommand(LockIn, ModAmpGet); \
+    // AddCommand(LockIn, ModPhasFreqSet); \
+    // AddCommand(LockIn, ModPhasFreqGet); \
+    // AddCommand(LockIn, DemodSignalSet); \
+    // AddCommand(LockIn, DemodSignalGet); \
+    // AddCommand(LockIn, DemodHarmonicSet); \
+    // AddCommand(LockIn, DemodHarmonicGet); \
+    // AddCommand(LockIn, DemodHPFilterSet); \
+    // AddCommand(LockIn, DemodHPFilterGet); \
+    // AddCommand(LockIn, DemodLPFilterSet); \
+    // AddCommand(LockIn, DemodLPFilterGet); \
+    // AddCommand(LockIn, DemodPhasRegSet); \
+    // AddCommand(LockIn, DemodPhasRegGet); \
+    // AddCommand(LockIn, DemodPhasSet); \
+    // AddCommand(LockIn, DemodPhasGet); \
+    // AddCommand(LockIn, DemodSyncFilterSet); \
+    // AddCommand(LockIn, DemodSyncFilterGet); \
+    // AddCommand(LockIn, DemodRTSignalsSet); \
+    // AddCommand(LockIn, DemodRTSignalsGet); \
+    // AddCommand(LockInFreqSwp, Open); \
+    // AddCommand(LockInFreqSwp, Start); \
+    // AddCommand(LockInFreqSwp, SignalSet); \
+    // AddCommand(LockInFreqSwp, SignalGet); \
+    // AddCommand(LockInFreqSwp, LimitsSet); \
+    // AddCommand(LockInFreqSwp, LimitsGet); \
+    // AddCommand(LockInFreqSwp, PropsSet); \
+    // AddCommand(LockInFreqSwp, PropsGet); \
+    // AddCommand(PLL, InpCalibrSet); \
+    // AddCommand(PLL, InpCalibrGet); \
+    // AddCommand(PLL, InpRangeSet); \
+    // AddCommand(PLL, InpRangeGet); \
+    // AddCommand(PLL, InpPropsSet); \
+    // AddCommand(PLL, InpPropsGet); \
+    // AddCommand(PLL, AddOnOffSet); \
+    // AddCommand(PLL, AddOnOffGet); \
+    // AddCommand(PLL, OutOnOffSet); \
+    // AddCommand(PLL, OutOnOffGet); \
+    // AddCommand(PLL, ExcRangeSet); \
+    // AddCommand(PLL, ExcRangeGet); \
+    // AddCommand(PLL, ExcitationSet); \
+    // AddCommand(PLL, ExcitationGet); \
+    // AddCommand(PLL, AmpCtrlSetpntSet); \
+    // AddCommand(PLL, AmpCtrlSetpntGet); \
+    // AddCommand(PLL, AmpCtrlOnOffSet); \
+    // AddCommand(PLL, AmpCtrlOnOffGet); \
+    // AddCommand(PLL, AmpCtrlGainSet); \
+    // AddCommand(PLL, AmpCtrlGainGet); \
+    // AddCommand(PLL, AmpCtrlBandwidthSet); \
+    // AddCommand(PLL, AmpCtrlBandwidthGet); \
+    // AddCommand(PLL, PhasCtrlOnOffSet); \
+    // AddCommand(PLL, PhasCtrlOnOffGet); \
+    // AddCommand(PLL, PhasCtrlGainSet); \
+    // AddCommand(PLL, PhasCtrlGainGet); \
+    // AddCommand(PLL, PhasCtrlBandwidthSet); \
+    // AddCommand(PLL, PhasCtrlBandwidthGet); \
+    // AddCommand(PLL, FreqRangeSet); \
+    // AddCommand(PLL, FreqRangeGet); \
+    // AddCommand(PLL, CenterFreqSet); \
+    // AddCommand(PLL, CenterFreqGet); \
+    // AddCommand(PLL, FreqShiftSet); \
+    // AddCommand(PLL, FreqShiftGet); \
+    // AddCommand(PLL, FreqShiftAutoCenter); \
+    // AddCommand(PLL, FreqExcOverwriteSet); \
+    // AddCommand(PLL, FreqExcOverwriteGet); \
+    // AddCommand(PLL, DemodInputSet); \
+    // AddCommand(PLL, DemodInputGet); \
+    // AddCommand(PLL, DemodHarmonicSet); \
+    // AddCommand(PLL, DemodHarmonicGet); \
+    // AddCommand(PLL, DemodPhasRefSet); \
+    // AddCommand(PLL, DemodPhasRefGet); \
+    // AddCommand(PLL, DemodFilterSet); \
+    // AddCommand(PLL, DemodFilterGet); \
+    // AddCommand(PLLQCtrl, AccessRequest); \
+    // AddCommand(PLLQCtrl, AccessGet); \
+    // AddCommand(PLLQCtrl, OnOffSet); \
+    // AddCommand(PLLQCtrl, OnOffGet); \
+    // AddCommand(PLLQCtrl, QGainSet); \
+    // AddCommand(PLLQCtrl, QGainGet); \
+    // AddCommand(PLLQCtrl, PhaseSet); \
+    // AddCommand(PLLQCtrl, PhaseGet); \
+    // AddCommand(PLLFreqSwp, Open); \
+    // AddCommand(PLLFreqSwp, ParamsSet); \
+    // AddCommand(PLLFreqSwp, ParamsGet); \
+    // AddCommand(PLLFreqSwp, Start); \
+    // AddCommand(PLLFreqSwp, Stop); \
+    // AddCommand(PLLPhasSwp, Start); \
+    // AddCommand(PLLPhasSwp, Stop); \
+    // AddCommand(PLLSignalAnlzr, Open); \
+    // AddCommand(PLLSignalAnlzr, ChSet); \
+    // AddCommand(PLLSignalAnlzr, ChGet); \
+    // AddCommand(PLLSignalAnlzr, TimebaseSet); \
+    // AddCommand(PLLSignalAnlzr, TimebaseGet); \
+    // AddCommand(PLLSignalAnlzr, TrigAuto); \
+    // AddCommand(PLLSignalAnlzr, TrigRearm); \
+    // AddCommand(PLLSignalAnlzr, TrigSet); \
+    // AddCommand(PLLSignalAnlzr, TrigGet); \
+    // AddCommand(PLLSignalAnlzr, OsciDataGet); \
+    // AddCommand(PLLSignalAnlzr, FFTPropsSet); \
+    // AddCommand(PLLSignalAnlzr, FFTPropsGet); \
+    // AddCommand(PLLSignalAnlzr, FFTAvgRestart); \
+    // AddCommand(PLLSignalAnlzr, FFTDataGet); \
+    // AddCommand(PLLZoomFFT, Open); \
+    // AddCommand(PLLZoomFFT, ChSet); \
+    // AddCommand(PLLZoomFFT, ChGet); \
+    // AddCommand(PLLZoomFFT, AvgRestart); \
+    // AddCommand(PLLZoomFFT, PropsSet); \
+    // AddCommand(PLLZoomFFT, PropsGet); \
+    // AddCommand(PLLZoomFFT, DataGet); \
+    // AddCommand(OCSync, AnglesSet); \
+    // AddCommand(OCSync, AnglesGet); \
+    // AddCommand(OCSync, LinkAnglesSet); \
+    // AddCommand(OCSync, LinkAnglesGet); \
+    // AddCommand(Script, Load); \
+    // AddCommand(Script, Save); \
+    // AddCommand(Script, Deploy); \
+    // AddCommand(Script, Undeploy); \
+    // AddCommand(Script, Run); \
+    // AddCommand(Script, Stop); \
+    // AddCommand(Script, ChsGet); \
+    // AddCommand(Script, ChsSet); \
+    // AddCommand(Script, DataGet); \
+    // AddCommand(Script, Autosave); \
+    // AddCommand(Interf, CtrlOnOffSet); \
+    // AddCommand(Interf, CtrlOnOffGet); \
+    // AddCommand(Interf, CtrlPropsSet); \
+    // AddCommand(Interf, CtrlPropsGet); \
+    // AddCommand(Interf, WPiezoSet); \
+    // AddCommand(Interf, WPiezoGet); \
+    // AddCommand(Interf, ValGet); \
+    // AddCommand(Interf, CtrlCalibrOpen); \
+    // AddCommand(Interf, CtrlReset); \
+    // AddCommand(Interf, CtrlNullDefl); \
+    // AddCommand(Laser, OnOffSet); \
+    // AddCommand(Laser, OnOffGet); \
+    // AddCommand(Laser, PropsSet); \
+    // AddCommand(Laser, PropsGet); \
+    // AddCommand(Laser, PowerGet); \
+    // AddCommand(BeamDefl, HorConfigSet); \
+    // AddCommand(BeamDefl, HorConfigGet); \
+    // AddCommand(BeamDefl, VerConfigSet); \
+    // AddCommand(BeamDefl, VerConfigGet); \
+    // AddCommand(BeamDefl, IntConfigSet); \
+    // AddCommand(BeamDefl, IntConfigGet); \
+    // AddCommand(BeamDefl, AutoOffset); \
+    // AddCommand(Signals, NamesGet); \
+    // AddCommand(Signals, InSlotSet); \
+    // AddCommand(Signals, InSlotsGet); \
+    // AddCommand(Signals, CalibrGet); \
+    // AddCommand(Signals, RangeGet); \
+    // AddCommand(Signals, ValGet); \
+    // AddCommand(Signals, ValsGet); \
+    // AddCommand(Signals, MeasNamesGet); \
+    // AddCommand(Signals, AddRTGet); \
+    // AddCommand(Signals, AddRTSet); \
+    // AddCommand(UserIn, CalibrSet); \
+    // AddCommand(UserOut, ModeSet); \
+    // AddCommand(UserOut, ModeGet); \
+    // AddCommand(UserOut, MonitorChSet); \
+    // AddCommand(UserOut, MonitorChGet); \
+    // AddCommand(UserOut, ValSet); \
+    // AddCommand(UserOut, CalibrSet); \
+    // AddCommand(UserOut, CalcSignalNameSet); \
+    // AddCommand(UserOut, CalcSignalNameGet); \
+    // AddCommand(UserOut, CalcSignalConfigSet); \
+    // AddCommand(UserOut, CalcSignalConfigGet); \
+    // AddCommand(UserOut, LimitsSet); \
+    // AddCommand(UserOut, LimitsGet); \
+    // AddCommand(DigLines, PropsSet); \
+    // AddCommand(DigLines, OutStatusSet); \
+    // AddCommand(DigLines, TTLValGet); \
+    // AddCommand(DigLines, Pulse); \
+    // AddCommand(DataLog, Open); \
+    // AddCommand(DataLog, Start); \
+    // AddCommand(DataLog, Stop); \
+    // AddCommand(DataLog, StatusGet); \
+    // AddCommand(DataLog, ChsSet); \
+    // AddCommand(DataLog, ChsGet); \
+    // AddCommand(DataLog, PropsSet); \
+    // AddCommand(DataLog, PropsGet); \
+    // AddCommand(TCPLog, Start); \
+    // AddCommand(TCPLog, Stop); \
+    // AddCommand(TCPLog, ChsSet); \
+    // AddCommand(TCPLog, OversamplSet); \
+    // AddCommand(TCPLog, StatusGet); \
+    // AddCommand(OsciHR, ChSet); \
+    // AddCommand(OsciHR, ChGet); \
+    // AddCommand(OsciHR, OversamplSet); \
+    // AddCommand(OsciHR, OversamplGet); \
+    // AddCommand(OsciHR, CalibrModeSet); \
+    // AddCommand(OsciHR, CalibrModeGet); \
+    // AddCommand(OsciHR, SamplesSet); \
+    // AddCommand(OsciHR, SamplesGet); \
+    // AddCommand(OsciHR, PreTrigSet); \
+    // AddCommand(OsciHR, PreTrigGet); \
+    // AddCommand(OsciHR, Run); \
+    // AddCommand(OsciHR, OsciDataGet); \
+    // AddCommand(OsciHR, TrigModeSet); \
+    // AddCommand(OsciHR, TrigModeGet); \
+    // AddCommand(OsciHR, TrigLevChSet); \
+    // AddCommand(OsciHR, TrigLevChGet); \
+    // AddCommand(OsciHR, TrigLevValSet); \
+    // AddCommand(OsciHR, TrigLevValGet); \
+    // AddCommand(OsciHR, TrigLevHystSet); \
+    // AddCommand(OsciHR, TrigLevHystGet); \
+    // AddCommand(OsciHR, TrigLevSlopeSet); \
+    // AddCommand(OsciHR, TrigLevSlopeGet); \
+    // AddCommand(OsciHR, TrigDigChSet); \
+    // AddCommand(OsciHR, TrigDigChGet); \
+    // AddCommand(OsciHR, TrigArmModeSet); \
+    // AddCommand(OsciHR, TrigArmModeGet); \
+    // AddCommand(OsciHR, TrigDigSlopeSet); \
+    // AddCommand(OsciHR, TrigDigSlopeGet); \
+    // AddCommand(OsciHR, TrigRearm); \
+    // AddCommand(OsciHR, PSDShow); \
+    // AddCommand(OsciHR, PSDWeightSet); \
+    // AddCommand(OsciHR, PSDWeightGet); \
+    // AddCommand(OsciHR, PSDWindowSet); \
+    // AddCommand(OsciHR, PSDWindowGet); \
+    // AddCommand(OsciHR, PSDAvrgTypeSet); \
+    // AddCommand(OsciHR, PSDAvrgTypeGet); \
+    // AddCommand(OsciHR, PSDAvrgCountSet); \
+    // AddCommand(OsciHR, PSDAvrgCountGet); \
+    // AddCommand(OsciHR, PSDAvrgRestart); \
+    // AddCommand(OsciHR, PSDDataGet); \
+    // AddCommand(Osci1T, ChSet); \
+    // AddCommand(Osci1T, ChGet); \
+    // AddCommand(Osci1T, TimebaseSet); \
+    // AddCommand(Osci1T, TimebaseGet); \
+    // AddCommand(Osci1T, TrigSet); \
+    // AddCommand(Osci1T, TrigGet); \
+    // AddCommand(Osci1T, Run); \
+    // AddCommand(Osci1T, DataGet); \
+    // AddCommand(Osci2T, ChsSet); \
+    // AddCommand(Osci2T, ChsGet); \
+    // AddCommand(Osci2T, TimebaseSet); \
+    // AddCommand(Osci2T, TimebaseGet); \
+    // AddCommand(Osci2T, OversamplSet); \
+    // AddCommand(Osci2T, OversamplGet); \
+    // AddCommand(Osci2T, TrigSet); \
+    // AddCommand(Osci2T, TrigGet); \
+    // AddCommand(Osci2T, Run); \
+    // AddCommand(Osci2T, DataGet); \
+    // AddCommand(SignalChart, Open); \
+    // AddCommand(SignalChart, ChsSet); \
+    // AddCommand(SignalChart, ChsGet); \
+    // AddCommand(SpectrumAnlzr, ChSet); \
+    // AddCommand(SpectrumAnlzr, ChGet); \
+    // AddCommand(SpectrumAnlzr, FreqRangeSet); \
+    // AddCommand(SpectrumAnlzr, FreqRangeGet); \
+    // AddCommand(SpectrumAnlzr, FreqResSet); \
+    // AddCommand(SpectrumAnlzr, FreqResGet); \
+    // AddCommand(SpectrumAnlzr, FFTWindowSet); \
+    // AddCommand(SpectrumAnlzr, FFTWindowGet); \
+    // AddCommand(SpectrumAnlzr, AveragSet); \
+    // AddCommand(SpectrumAnlzr, AveragGet); \
+    // AddCommand(SpectrumAnlzr, ACCouplingSet); \
+    // AddCommand(SpectrumAnlzr, ACCouplingGet); \
+    // AddCommand(SpectrumAnlzr, CursorPosSet); \
+    // AddCommand(SpectrumAnlzr, CursorPosGet); \
+    // AddCommand(SpectrumAnlzr, BandRMSGet); \
+    // AddCommand(SpectrumAnlzr, DCGet); \
+    // AddCommand(SpectrumAnlzr, Run); \
+    // AddCommand(SpectrumAnlzr, DataGet); \
+    // AddCommand(FunGen1Ch, Start); \
+    // AddCommand(FunGen1Ch, Stop); \
+    // AddCommand(FunGen1Ch, StatusGet); \
+    // AddCommand(FunGen1Ch, PropsSet); \
+    // AddCommand(FunGen1Ch, PropsGet); \
+    // AddCommand(FunGen1Ch, IdleSet); \
+    // AddCommand(FunGen1Ch, IdleGet); \
+    // AddCommand(FunGen2Ch, Start); \
+    // AddCommand(FunGen2Ch, Stop); \
+    // AddCommand(FunGen2Ch, StatusGet); \
+    // AddCommand(FunGen2Ch, IdleSet); \
+    // AddCommand(FunGen2Ch, IdleGet); \
+    // AddCommand(FunGen2Ch, OnOffSet); \
+    // AddCommand(FunGen2Ch, OnOffGet); \
+    // AddCommand(FunGen2Ch, SignalSet); \
+    // AddCommand(FunGen2Ch, SignalGet); \
+    // AddCommand(FunGen2Ch, PropsSet); \
+    // AddCommand(FunGen2Ch, PropsGet); \
+    // AddCommand(FunGen2Ch, WaveformSet); \
+    // AddCommand(FunGen2Ch, WaveformGet); \
+    // AddCommand(Util, SessionPathGet); \
+    // AddCommand(Util, SettingsLoad); \
+    // AddCommand(Util, SettingsSave); \
+    // AddCommand(Util, LayoutLoad); \
+    // AddCommand(Util, LayoutSave); \
+    // AddCommand(Util, Lock); \
+    // AddCommand(Util, UnLock); \
+    // AddCommand(Util, RTFreqSet); \
+    // AddCommand(Util, RTFreqGet); \
+    // AddCommand(Util, AcqPeriodSet); \
+    // AddCommand(Util, AcqPeriodGet); \
+    // AddCommand(Util, RTOversamplSet); \
+    // AddCommand(Util, RTOversamplGet); \
+    // AddCommand(Util, Quit);    
 
 #define AddBiasFunctions \
-    AddFunction(Bias, Set); \
+    AddFunction(Bias, Set, nano_float32); \
     AddFunction(Bias, Get); \
-    AddFunction(Bias, RangeSet); \
+    AddFunction(Bias, RangeSet, nano_unsigned_int16); \
     AddFunction(Bias, RangeGet); \
-    AddFunction(Bias, CalibrSet); \
+    AddFunction(Bias, CalibrSet, nano_float32, nano_float32); \
     AddFunction(Bias, CalibrGet); \
-    AddFunction(Bias, Pulse); \
+    AddFunction(Bias, Pulse, nano_unsigned_int32, nano_float32, nano_float32, nano_unsigned_int16, nano_unsigned_int16);
 
 #define AddBiasSwpFunctions \
     AddFunction(BiasSwp, Open); \
-    AddFunction(BiasSwp, Start); \
-    AddFunction(BiasSwp, PropsSet); \
-    AddFunction(BiasSwp, LimitsSet);
+    AddFunction(BiasSwp, Start, nano_unsigned_int32, nano_unsigned_int32, nano_unsigned_int32, nano_int, nano_string, nano_unsigned_int32); \
+    AddFunction(BiasSwp, PropsSet, nano_unsigned_int16, nano_unsigned_int16, nano_unsigned_int16, nano_unsigned_int16); \
+    AddFunction(BiasSwp, LimitsSet, nano_float32, nano_float32);
 
 #define AddBiasSpectrFunctions \
     AddFunction(BiasSpectr, PropsGet); \

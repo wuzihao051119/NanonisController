@@ -1,6 +1,18 @@
 #include "mainwindow.h"
 
 MainWindow::MainWindow(QWidget *parent) {
+    initUi();
+    initTclInterp();
+    initCommand();
+}
+
+MainWindow::~MainWindow() {
+    Tcl_DeleteInterp(interp);
+    delete m_function;
+    delete m_command;
+}
+
+void MainWindow::initUi() {
     QWidget *centralWidget = new QWidget;
 
     QVBoxLayout *configLayout = new QVBoxLayout;
@@ -28,6 +40,14 @@ MainWindow::MainWindow(QWidget *parent) {
     resize(800, 600);
 }
 
-MainWindow::~MainWindow() {
+void MainWindow::initTclInterp() {
+    interp = Tcl_CreateInterp();
 
+    Tcl_CreateObjCommand(interp, "Bias.Get", NULL, NULL, NULL);
+    Tcl_Eval(interp, "Bias.Get");
+}
+
+void MainWindow::initCommand() {
+    m_function = new Function(oss);
+    m_command = new Command(*m_function);
 }

@@ -4,15 +4,22 @@
 #include <functional>
 #include <string>
 #include <unordered_map>
+#include "function.h"
 
 class Command
 {
 public:
-    Command();
-    ~Command();
+    Command() = delete;
+    Command(const Command &) = delete;
+    Command &operator=(const Command &) = delete;
+    ~Command() = default;
+
+    Command(Function &function);
+    Function &function() const { return m_function; }
 
 private:
-    std::unordered_map<std::string, std::function<std::string &(std::vector<std::string> &)>> command;
+    std::unordered_map<std::string, std::function<void(std::vector<std::string> &)>> m_command;
+    Function &m_function;
 };
 
 #endif // COMMAND_H
