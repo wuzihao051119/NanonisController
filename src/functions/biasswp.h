@@ -1,7 +1,7 @@
 #ifndef BIASSWP_H
 #define BIASSWP_H
 
-#include "macro.h"
+#include "../macro.h"
 
 class BiasSwp
 {

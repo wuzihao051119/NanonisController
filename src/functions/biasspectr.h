@@ -1,7 +1,7 @@
 #ifndef BIASSPECTR_H
 #define BIASSPECTR_H
 
-#include "macro.h"
+#include "../macro.h"
 
 class BiasSpectr
 {

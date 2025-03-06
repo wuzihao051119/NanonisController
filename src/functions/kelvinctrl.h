@@ -1,7 +1,7 @@
 #ifndef KELVINCTRL_H
 #define KELVINCTRL_H
 
-#include "macro.h"
+#include "../macro.h"
 
 class KelvinCtrl
 {
