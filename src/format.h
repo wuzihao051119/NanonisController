@@ -1,3 +1,7 @@
+// Copyright (c) 2025 Zihao Wu
+// Use of this source code is governed by the MIT license that can be
+// found in the LICENSE file.
+
 #ifndef FORMAT_H
 #define FORMAT_H
 
@@ -52,7 +56,7 @@ void appendSingleType(std::ostream &os, std::vector<T> &arg) {
     appendSingleType(os, arg);
 }
 
-template <typename T, typename = void>
+template <typename T>
 T convertTo(std::string &str) {
     return str;
 }
