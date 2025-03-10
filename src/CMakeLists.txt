@@ -11,9 +11,10 @@ qt_standard_project_setup()
 
 qt_add_executable(NanonisController
     mainwindow.cpp mainwindow.h
+    type.cpp type.h
     socket.cpp socket.h
     command.cpp command.h
-    function.h format.h type.h macro.h
+    function.h format.h macro.h
     main.cpp
 )
 

@@ -8,89 +8,74 @@
 #include "type.h"
 #include "macro.h"
 
+template <typename T, typename = void>
+struct convertTo {
+    const T &operator()(const std::string &str) {
+        return str;
+    }
+};
+
+template <>
+struct convertTo<nano_string> {
+    const nano_string &operator()(const std::string &str) {
+        return nano_string(str);
+    }
+};
+
+template <>
+struct convertTo<nano_int> {
+    const nano_int &operator()(const std::string &str) {
+        return nano_int(std::stoi(str));
+    }
+};
+
+template <>
+struct convertTo<nano_unsigned_int16> {
+    const nano_unsigned_int16 &operator()(const std::string &str) {
+        return nano_unsigned_int16(std::stoi(str));
+    }
+};
+
+template <>
+struct convertTo<nano_unsigned_int32> {
+    const nano_unsigned_int32 &operator()(const std::string &str) {
+        return nano_unsigned_int32(std::stoi(str));
+    }
+};
+
+template <>
+struct convertTo<nano_float32> {
+    const nano_float32 &operator()(const std::string &str) {
+        return nano_float32(std::stof(str));
+    }
+};
+
+template <>
+struct convertTo<nano_float64> {
+    const nano_float64 &operator()(const std::string &str) {
+        return nano_float64(std::stod(str));
+    }
+};
+
 template <typename T>
-void appendSingleType(std::ostream &os, T arg) {
-    os << arg;
-}
-
-template <>
-inline void appendSingleType(std::ostream &os, nano_unsigned_int16 arg) {
-    os << static_cast<unsigned char>(arg >> 8) << static_cast<unsigned char>(arg);
-}
-
-template <>
-inline void appendSingleType(std::ostream &os, nano_int arg) {
-    appendSingleType(os, static_cast<std::uint16_t>(arg >> 16));
-    appendSingleType(os, static_cast<std::uint16_t>(arg));
-}
-
-template <>
-inline void appendSingleType(std::ostream &os, nano_unsigned_int32 arg) {
-    appendSingleType(os, static_cast<std::uint16_t>(arg >> 16));
-    appendSingleType(os, static_cast<std::uint16_t>(arg));
-}
-
-template <>
-inline void appendSingleType(std::ostream& os, std::uint64_t arg) {
-    appendSingleType(os, static_cast<std::uint32_t>(arg >> 32));
-    appendSingleType(os, static_cast<std::uint32_t>(arg));
-}
-
-template <>
-inline void appendSingleType(std::ostream &os, nano_float32 arg) {
-    appendSingleType(os, *reinterpret_cast<std::uint32_t *>(&arg));
-}
-
-template <>
-inline void appendSingleType(std::ostream &os, nano_float64 arg) {
-    appendSingleType(os, *reinterpret_cast<std::uint64_t *>(&arg));
-}
-
-template <typename T>
-void appendSingleType(std::ostream &os, std::vector<T> &arg) {
-    if (arg.empty())
-        return;
-    appendSingleType(os, arg.front());
-    std::swap(*std::begin(arg), *(std::end(arg) - 1));
-    arg.pop_back();
-    appendSingleType(os, arg);
-}
-
-template <typename T>
-T convertTo(std::string &str) {
-    return str;
-}
-
-template <>
-inline nano_int convertTo(std::string &str) {
-    return std::stoi(str);
-}
-
-template <>
-inline nano_unsigned_int16 convertTo(std::string &str) {
-    return static_cast<nano_unsigned_int16>(std::stoi(str));
-}
-
-template <>
-inline nano_unsigned_int32 convertTo(std::string &str) {
-    return static_cast<nano_unsigned_int32>(std::stoi(str));
-}
-
-template <>
-inline nano_float32 convertTo(std::string &str) {
-    return std::stof(str);
-}
-
-template <>
-inline nano_float64 convertTo(std::string &str) {
-    return std::stod(str);
-}
+struct convertTo<T, std::enable_if_t<
+    std::is_same_v<T, nano_1D_array_string> ||
+    std::is_same_v<T, nano_1D_array_int> ||
+    std::is_same_v<T, nano_1D_array_unsigned_int8> ||
+    std::is_same_v<T, nano_1D_array_unsigned_int32> ||
+    std::is_same_v<T, nano_1D_array_float32> ||
+    std::is_same_v<T, nano_1D_array_float64> ||
+    std::is_same_v<T, nano_2D_array_float32>
+>> {
+    const T &operator()(const std::string &str) {
+        return T();
+    }
+};
 
 template <typename T, typename ...Ts>
 void appendArgs(std::ostream &os, std::vector<std::string> &args) {
-    appendSingleType(os, convertTo<T>(args.front()));
-    std::swap(*std::begin(args), *(std::end(args) - 1));
-    args.pop_back();
+    os << convertTo<T>()(args.front());
+    std::begin(args)++;
     appendArgs<Ts...>(os, args);
 }
 

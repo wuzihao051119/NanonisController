@@ -5,22 +5,97 @@
 #ifndef TYPE_H
 #define TYPE_H
 
+#include <algorithm>
 #include <ostream>
 #include <string>
 #include <vector>
 
-typedef std::string nano_string;
-typedef std::int32_t nano_int;
-typedef std::uint16_t nano_unsigned_int16;
-typedef std::uint32_t nano_unsigned_int32;
-typedef float nano_float32;
-typedef double nano_float64;
-typedef std::vector<nano_string> nano_1D_array_string;
-typedef std::vector<nano_int> nano_1D_array_int;
-typedef std::vector<std::uint8_t> nano_1D_array_unsigned_int8;
-typedef std::vector<nano_unsigned_int32> nano_1D_array_unsigned_int32;
-typedef std::vector<nano_float32> nano_1D_array_float32;
-typedef std::vector<nano_float64> nano_1D_array_float64;
-typedef std::vector<std::vector<nano_float32>> nano_2D_array_float32;
+struct nano_string {
+    std::string value;
+    friend std::ostream &operator<<(std::ostream &os, const nano_string &arg);
+};
+
+struct nano_int {
+    std::int32_t value;
+    friend std::ostream &operator<<(std::ostream &os, const nano_int &arg);
+};
+
+struct nano_unsigned_int16 {
+    std::uint16_t value;
+    friend std::ostream &operator<<(std::ostream &os, const nano_unsigned_int16 &arg);
+};
+
+struct nano_unsigned_int32 {
+    std::uint32_t value;
+    friend std::ostream &operator<<(std::ostream &os, const nano_unsigned_int32 &arg);
+};
+
+struct nano_unsigned_int64 {
+    std::uint64_t value;
+    friend std::ostream &operator<<(std::ostream &os, const nano_unsigned_int64 &arg);
+};
+
+struct nano_float32 {
+    float value;
+    friend std::ostream &operator<<(std::ostream &os, const nano_float32 &arg);
+};
+
+struct nano_float64 {
+    double value;
+    friend std::ostream &operator<<(std::ostream &os, const nano_float64 &arg);
+};
+
+struct nano_1D_array_string {
+    std::vector<nano_string> value;
+    friend std::ostream &operator<<(std::ostream &os, const nano_1D_array_string &arg);
+};
+
+struct nano_1D_array_int {
+    std::vector<nano_int> value;
+    friend std::ostream &operator<<(std::ostream &os, const nano_1D_array_int &arg);
+};
+
+struct nano_1D_array_unsigned_int8 {
+    std::vector<std::uint8_t> value;
+    friend std::ostream &operator<<(std::ostream &os, const nano_1D_array_unsigned_int8 &arg);
+};
+
+struct nano_1D_array_unsigned_int32 {
+    std::vector<nano_unsigned_int32> value;
+    friend std::ostream &operator<<(std::ostream &os, const nano_1D_array_unsigned_int32 &arg);
+};
+
+struct nano_1D_array_float32 {
+    std::vector<nano_float32> value;
+    friend std::ostream &operator<<(std::ostream &os, const nano_1D_array_float32 &arg);
+};
+
+struct nano_1D_array_float64 {
+    std::vector<nano_float64> value;
+    friend std::ostream &operator<<(std::ostream &os, const nano_1D_array_float64 &arg);
+};
+
+struct nano_2D_array_float32 {
+    std::vector<std::vector<nano_float32>> value;
+    friend std::ostream &operator<<(std::ostream &os, const nano_2D_array_float32 &arg);
+};
+
+template <typename T, typename = std::enable_if_t<
+    std::is_same_v<T, nano_1D_array_int> ||
+    std::is_same_v<T, nano_1D_array_string> ||
+    std::is_same_v<T, nano_1D_array_unsigned_int8> ||
+    std::is_same_v<T, nano_1D_array_unsigned_int32> ||
+    std::is_same_v<T, nano_1D_array_float32> ||
+    std::is_same_v<T, nano_1D_array_float64>
+>>
+std::ostream &appendArrayInternal(std::ostream &os, const T &arg) {
+    std::for_each(arg.value.begin(), arg.value.end(), [&os](const decltype(arg.value)::value_type &item) { os << item; });
+    return os;
+}
+
+template <typename T, typename = std::enable_if_t<std::is_same_v<T, nano_2D_array_float32>>>
+std::ostream &append2DArrayInternal(std::ostream &os, const T &arg) {
+    return os;
+}
 
 #endif // TYPE_H

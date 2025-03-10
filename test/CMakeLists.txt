@@ -9,10 +9,12 @@ project(NanonisControllerFunctionTest LANGUAGES CXX)
 
 add_executable(NanonisControllerFormatTest
     format.cpp
+    ../src/type.cpp ../src/type.h
 )
 
 add_executable(NanonisControllerBiasTest
     bias.cpp
+    ../src/type.cpp ../src/type.h
 )
 
 add_executable(NanonisControllerFunctionTest
