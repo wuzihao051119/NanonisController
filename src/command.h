@@ -6,6 +6,8 @@
 #define COMMAND_H
 
 #include <functional>
+#include <iomanip>
+#include <sstream>
 #include <string>
 #include <unordered_map>
 #include "function.h"
@@ -18,12 +20,17 @@ public:
     Command &operator=(const Command &) = delete;
     ~Command() = default;
 
-    Command(Function &function);
+    Command(Function &function, std::ostringstream &oss);
     Function &function() const { return m_function; }
+
+    void invoke(const std::string &commandName, std::vector<std::string> &args);
+    void makeHeader(const std::string &commandName, const int &bodySize);
 
 private:
     std::unordered_map<std::string, std::function<void(std::vector<std::string> &)>> m_command;
     Function &m_function;
+    bool m_sendResponseBack;
+    std::ostringstream &m_oss;
 };
 
 #endif // COMMAND_H

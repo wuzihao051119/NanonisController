@@ -8,9 +8,6 @@
 #include <vector>
 #include <string>
 
-#define ResponseBackTrue (nano_unsigned_int16)1
-#define ResponseBackFalse (nano_unsigned_int16)0
-
 #define AddCommand(Module, Func) \
     m_command.emplace(#Module "." #Func, std::bind(&Function::Module##Func, &m_function, std::placeholders::_1));
 #define AddFunction(Module, Func, ...) \

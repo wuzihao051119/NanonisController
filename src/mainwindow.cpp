@@ -11,7 +11,7 @@ MainWindow::MainWindow(QWidget *parent) {
 }
 
 MainWindow::~MainWindow() {
-    Tcl_DeleteInterp(interp);
+    Tcl_DeleteInterp(m_interp);
     delete m_function;
     delete m_command;
 }
@@ -45,13 +45,13 @@ void MainWindow::initUi() {
 }
 
 void MainWindow::initTclInterp() {
-    interp = Tcl_CreateInterp();
+    m_interp = Tcl_CreateInterp();
 
-    Tcl_CreateObjCommand(interp, "Bias.Get", NULL, NULL, NULL);
-    Tcl_Eval(interp, "Bias.Get");
+    Tcl_CreateObjCommand(m_interp, "Bias.Get", NULL, NULL, NULL);
+    Tcl_Eval(m_interp, "Bias.Get");
 }
 
 void MainWindow::initCommand() {
-    m_function = new Function(oss);
-    m_command = new Command(*m_function);
+    m_function = new Function(m_oss);
+    m_command = new Command(*m_function, m_oss);
 }

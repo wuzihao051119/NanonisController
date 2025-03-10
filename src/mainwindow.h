@@ -29,8 +29,8 @@ private:
     void initCommand();
 
 private:
-    Tcl_Interp *interp;
-    std::ostringstream oss;
+    Tcl_Interp *m_interp;
+    std::ostringstream m_oss;
     Function *m_function;
     Command *m_command;
 };

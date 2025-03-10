@@ -19,4 +19,5 @@ add_executable(NanonisControllerBiasTest
 
 add_executable(NanonisControllerFunctionTest
     function.cpp
+    ../src/type.cpp ../src/type.h
 )
