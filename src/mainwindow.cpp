@@ -21,7 +21,7 @@ void MainWindow::initUi() {
 
     QWidget *centralWidget = new QWidget;
 
-    QVBoxLayout *configLayout = new QVBoxLayout;
+    QHBoxLayout *configLayout = new QHBoxLayout;
     QLabel *hostAddressLabel = new QLabel(tr("Host Address"));
     hostAddressLineEdit = new QLineEdit;
     QLabel *portLabel = new QLabel(tr("Port"));
@@ -32,7 +32,6 @@ void MainWindow::initUi() {
     configLayout->addWidget(portLabel);
     configLayout->addWidget(portLineEdit);
     configLayout->addWidget(connectButton);
-    configLayout->setAlignment(Qt::AlignLeft | Qt::AlignTop);
 
     QVBoxLayout *mainLayout = new QVBoxLayout;
     QPlainTextEdit *commandTextEdit = new QPlainTextEdit;
