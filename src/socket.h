@@ -11,7 +11,7 @@ class Socket : public QTcpSocket {
     Q_OBJECT
 
 public:
-    Socket(QWidget *parnet = nullptr);
+    Socket(QObject *parnet = nullptr);
     ~Socket();
 
 public slots:
