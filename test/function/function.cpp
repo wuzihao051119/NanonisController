@@ -4,7 +4,7 @@
 
 #include <sstream>
 #include <vector>
-#include "../src/function.h"
+#include "../../src/function.h"
 
 int main(int argc, char *argv) {
     std::ostringstream oss;

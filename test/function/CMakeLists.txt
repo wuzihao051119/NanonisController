@@ -3,9 +3,9 @@
 # found in the LICENSE file.
 
 cmake_minimum_required(VERSION 3.16 FATAL_ERROR)
+project(NanonisControllerFunctionTest LANGUAGES CXX)
 
-add_subdirectory(format)
-add_subdirectory(bias)
-add_subdirectory(function)
-add_subdirectory(request)
-add_subdirectory(tcpserver)
+add_executable(NanonisControllerFunctionTest
+    function.cpp
+    ../../src/type.cpp ../../src/type.h
+)

@@ -7,11 +7,16 @@
 
 #include <QTcpSocket>
 
-class Socket : public QTcpSocket
-{
+class Socket : public QTcpSocket {
+    Q_OBJECT
+
 public:
     Socket(QWidget *parnet = nullptr);
     ~Socket();
+
+public slots:
+    void connectToTcpServer(QHostAddress &address, quint16 port);
+    void sendData(const QByteArray &data);
 };
 
 #endif // SOCKET_H

@@ -17,13 +17,15 @@ MainWindow::~MainWindow() {
 }
 
 void MainWindow::initUi() {
+    m_socket = new Socket;
+
     QWidget *centralWidget = new QWidget;
 
     QVBoxLayout *configLayout = new QVBoxLayout;
     QLabel *hostAddressLabel = new QLabel(tr("Host Address"));
-    QLineEdit *hostAddressLineEdit = new QLineEdit;
+    hostAddressLineEdit = new QLineEdit;
     QLabel *portLabel = new QLabel(tr("Port"));
-    QLineEdit *portLineEdit = new QLineEdit;
+    portLineEdit = new QLineEdit;
     QPushButton *connectButton = new QPushButton(tr("Connect"));
     configLayout->addWidget(hostAddressLabel);
     configLayout->addWidget(hostAddressLineEdit);
@@ -34,10 +36,23 @@ void MainWindow::initUi() {
 
     QVBoxLayout *mainLayout = new QVBoxLayout;
     QPlainTextEdit *commandTextEdit = new QPlainTextEdit;
+    
+    QHBoxLayout *submitLayout = new QHBoxLayout;
+    QLineEdit *commandlineEdit = new QLineEdit;
+    QPushButton *submitButton = new QPushButton(tr("Submit"));
+    submitLayout->addWidget(commandlineEdit);
+    submitLayout->addWidget(submitButton);
+
     mainLayout->addLayout(configLayout);
     mainLayout->addWidget(commandTextEdit);
+    mainLayout->addLayout(submitLayout);
 
     centralWidget->setLayout(mainLayout);
+
+    connect(connectButton, &QPushButton::clicked, this, &MainWindow::getHostAddress);
+    connect(this, &MainWindow::socketConnect, m_socket, &Socket::connectToTcpServer);
+    connect(submitButton, &QPushButton::clicked, this, &MainWindow::invokeCommand);
+    connect(this, &MainWindow::socketSendData, m_socket, &Socket::sendData);
 
     setCentralWidget(centralWidget);
     setWindowTitle(tr("NanonisController"));
@@ -54,4 +69,18 @@ void MainWindow::initTclInterp() {
 void MainWindow::initCommand() {
     m_function = new Function(m_oss);
     m_command = new Command(*m_function, m_oss);
+}
+
+void MainWindow::getHostAddress() {
+    QString address = hostAddressLineEdit->text();
+    quint16 port = portLineEdit->text().toUShort();
+    QHostAddress hostAddress = QHostAddress(address);
+    emit socketConnect(hostAddress, port);
+}
+
+void MainWindow::invokeCommand() {
+    std::vector<std::string> args;
+    args.emplace_back("0.000000005");
+    m_command->invoke("Bias.Set", args);
+    emit socketSendData(QByteArray::fromStdString(m_oss.str()));
 }

@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 #include <sstream>
-#include "../src/format.h"
+#include "../../src/format.h"
 
 int main(int argc, char *argv[]) {
     std::ostringstream oss;

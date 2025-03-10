@@ -11,3 +11,11 @@ Socket::Socket(QWidget *parent) {
 Socket::~Socket() {
 
 }
+
+void Socket::connectToTcpServer(QHostAddress &address, quint16 port) {
+    connectToHost(address, port);
+}
+
+void Socket::sendData(const QByteArray &data) {
+    write(data);
+}

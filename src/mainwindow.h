@@ -16,9 +16,11 @@
 
 #include "command.h"
 #include "function.h"
+#include "socket.h"
 
-class MainWindow : public QMainWindow
-{
+class MainWindow : public QMainWindow {
+    Q_OBJECT
+
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
@@ -28,11 +30,23 @@ private:
     void initTclInterp();
     void initCommand();
 
+signals:
+    void socketConnect(QHostAddress &address, quint16 port);
+    void socketSendData(const QByteArray &data);
+
+private slots:
+    void getHostAddress();
+    void invokeCommand();
+
 private:
     Tcl_Interp *m_interp;
     std::ostringstream m_oss;
     Function *m_function;
     Command *m_command;
+    Socket *m_socket;
+
+    QLineEdit *hostAddressLineEdit;
+    QLineEdit *portLineEdit;
 };
 
 #endif // MAINWINDOW_H
