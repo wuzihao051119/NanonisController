@@ -14,9 +14,16 @@ public:
     Socket(QObject *parnet = nullptr);
     ~Socket();
 
+public:
+    QByteArray m_receiveData;
+
 public slots:
     void connectToTcpServer(QHostAddress &address, quint16 port);
     void sendData(const QByteArray &data);
+    void receiveData();
+
+signals:
+    void dataAvailable();
 };
 
 #endif // SOCKET_H

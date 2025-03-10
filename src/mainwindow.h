@@ -24,12 +24,7 @@ class MainWindow : public QMainWindow {
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
-
-private:
-    void initUi();
-    void initTclInterp();
-    void initCommand();
-
+    
 signals:
     void socketConnect(QHostAddress &address, quint16 port);
     void socketSendData(const QByteArray &data);
@@ -37,7 +32,13 @@ signals:
 private slots:
     void getHostAddress();
     void invokeCommand();
+    void getResponse();
 
+private:
+    void initUi();
+    void initTclInterp();
+    void initCommand();
+    
 private:
     Tcl_Interp *m_interp;
     std::ostringstream m_oss;

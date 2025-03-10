@@ -52,6 +52,7 @@ void MainWindow::initUi() {
     connect(this, &MainWindow::socketConnect, m_socket, &Socket::connectToTcpServer);
     connect(submitButton, &QPushButton::clicked, this, &MainWindow::invokeCommand);
     connect(this, &MainWindow::socketSendData, m_socket, &Socket::sendData);
+    connect(m_socket, &Socket::dataAvailable, this, &MainWindow::getResponse);
 
     setCentralWidget(centralWidget);
     setWindowTitle(tr("NanonisController"));
@@ -82,4 +83,9 @@ void MainWindow::invokeCommand() {
     args.emplace_back("0.000000005");
     m_command->invoke("Bias.Set", args);
     emit socketSendData(QByteArray::fromStdString(m_oss.str()));
+}
+
+void MainWindow::getResponse() {
+    QByteArray &data = m_socket->m_receiveData;
+    qDebug() << data;
 }

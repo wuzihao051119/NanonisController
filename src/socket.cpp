@@ -5,11 +5,11 @@
 #include "socket.h"
 
 Socket::Socket(QObject *parent) : QTcpSocket(parent) {
-
+    connect(this, &Socket::readyRead, this, &Socket::receiveData);
 }
 
 Socket::~Socket() {
-
+    this->close();
 }
 
 void Socket::connectToTcpServer(QHostAddress &address, quint16 port) {
@@ -18,4 +18,11 @@ void Socket::connectToTcpServer(QHostAddress &address, quint16 port) {
 
 void Socket::sendData(const QByteArray &data) {
     write(data);
+}
+
+void Socket::receiveData() {
+    if (bytesAvailable() != 0) {
+        m_receiveData = readAll();
+        emit dataAvailable();
+    }
 }
