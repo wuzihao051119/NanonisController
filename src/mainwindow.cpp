@@ -47,8 +47,8 @@ void MainWindow::initUi() {
 void MainWindow::initTclInterp() {
     m_interp = Tcl_CreateInterp();
 
-    Tcl_CreateObjCommand(m_interp, "Bias.Get", NULL, NULL, NULL);
-    Tcl_Eval(m_interp, "Bias.Get");
+    // Tcl_CreateObjCommand(m_interp, "Bias.Get", NULL, NULL, NULL);
+    // Tcl_Eval(m_interp, "Bias.Get");
 }
 
 void MainWindow::initCommand() {

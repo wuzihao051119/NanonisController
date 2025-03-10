@@ -8,6 +8,12 @@
 
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
+
+    QCoreApplication::setApplicationName("NanonisController");
+    QCoreApplication::setApplicationVersion("v1.0");
+    QCoreApplication::setOrganizationName("CCM");
+    QCoreApplication::setOrganizationDomain("ccm.zju.edu.cn");
+
     MainWindow window;
     window.show();
     app.exec();

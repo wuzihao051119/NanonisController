@@ -26,3 +26,15 @@ set_target_properties(NanonisController PROPERTIES
 
 target_link_libraries(NanonisController PRIVATE C:/Libraries/tcl9.0.1/lib/tcl90.lib C:/Libraries/tcl9.0.1/lib/tclstub.lib)
 target_link_libraries(NanonisController PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Network)
+
+install(TARGETS NanonisController
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+)
+
+qt_generate_deploy_app_script(
+    TARGET NanonisController
+    OUTPUT_SCRIPT deploy_script
+    NO_UNSUPPORTED_PLATFORM_ERROR
+)
+install(SCRIPT deploy_script)
