@@ -13,6 +13,8 @@ qt_add_executable(NanonisController
     mainwindow.cpp mainwindow.h
     type.cpp type.h
     socket.cpp socket.h
+    tclwrapper.cpp tclwrapper.h
+    tclpipe.cpp tclpipe.h
     command.cpp command.h
     function.h format.h macro.h
     main.cpp

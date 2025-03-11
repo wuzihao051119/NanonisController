@@ -12,17 +12,16 @@
 #include <QPlainTextEdit>
 #include <QPushButton>
 
-#include <tcl.h>
-
 #include "command.h"
 #include "function.h"
 #include "socket.h"
+#include "tclpipe.h"
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = nullptr);
+    MainWindow(pTclPipes pipes, QWidget *parent = nullptr);
     ~MainWindow();
     
 signals:
@@ -36,15 +35,14 @@ private slots:
 
 private:
     void initUi();
-    void initTclInterp();
     void initCommand();
     
 private:
-    Tcl_Interp *m_interp;
     std::ostringstream m_oss;
     Function *m_function;
     Command *m_command;
     Socket *m_socket;
+    pTclPipes m_pipes;
 
     QLineEdit *hostAddressLineEdit;
     QLineEdit *portLineEdit;

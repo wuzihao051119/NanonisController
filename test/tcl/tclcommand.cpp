@@ -1,6 +1,10 @@
+// Copyright (c) 2025 Zihao Wu
+// Use of this source code is governed by the MIT license that can be
+// found in the LICENSE file.
+
 #include "tclcommand.h"
 
-#define warpper(Func) \
+#define wrapper(Func) \
     [](ClientData clientData, Tcl_Interp *interp, int objc, Tcl_Obj *const *objv) { \
         return reinterpret_cast<TclCommand *>(clientData)->Func(interp, objc, objv); \
     }
@@ -23,8 +27,8 @@ void TclCommand::deleteTcl() {
 }
 
 void TclCommand::registerCommand() {
-    Tcl_Command ret1 = Tcl_CreateObjCommand(m_interp, "Bias.Set", warpper(BiasSet), this, NULL);
-    Tcl_Command ret2 = Tcl_CreateObjCommand(m_interp, "Bias.Get", warpper(BiasGet), this, NULL);
+    Tcl_Command ret1 = Tcl_CreateObjCommand(m_interp, "Bias.Set", wrapper(BiasSet), this, NULL);
+    Tcl_Command ret2 = Tcl_CreateObjCommand(m_interp, "Bias.Get", wrapper(BiasGet), this, NULL);
 }
 
 int TclCommand::BiasSet(Tcl_Interp *interp, int objc, Tcl_Obj *const *objv) {

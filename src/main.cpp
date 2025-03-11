@@ -3,8 +3,10 @@
 // found in the LICENSE file.
 
 #include <QApplication>
-#include "mainwindow.h"
 #include "command.h"
+#include "mainwindow.h"
+#include "tclpipe.h"
+#include "tclwrapper.h"
 
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
@@ -14,7 +16,11 @@ int main(int argc, char *argv[]) {
     QCoreApplication::setOrganizationName("CCM");
     QCoreApplication::setOrganizationDomain("ccm.zju.edu.cn");
 
-    MainWindow window;
+    TclPipe tclPipe;
+    pTclPipes pipes = tclPipe.getTclPipes();
+    TclWrapper tclWrapper(pipes);
+
+    MainWindow window(pipes);
     window.show();
-    app.exec();
+    return app.exec();
 }

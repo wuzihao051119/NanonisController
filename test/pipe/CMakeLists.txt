@@ -3,11 +3,8 @@
 # found in the LICENSE file.
 
 cmake_minimum_required(VERSION 3.16 FATAL_ERROR)
+project(NanonisControllerPipeTest LANGUAGES CXX)
 
-add_subdirectory(format)
-add_subdirectory(bias)
-add_subdirectory(function)
-add_subdirectory(request)
-add_subdirectory(tcpserver)
-add_subdirectory(tcl)
-add_subdirectory(pipe)
+add_executable(NanonisControllerPipeTest
+    main.cpp
+)

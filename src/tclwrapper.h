@@ -2,26 +2,34 @@
 // Use of this source code is governed by the MIT license that can be
 // found in the LICENSE file.
 
-#ifndef TCLCOMMAND_H
-#define TCLCOMMAND_H
+#ifndef TCLWRAPPER_H
+#define TCLWRAPPER_H
 
 #include <tcl.h>
 
-class TclCommand {
+#include "tclpipe.h"
+
+class TclWrapper {
 public:
-    TclCommand(Tcl_Interp *interp);
-    ~TclCommand();
+    TclWrapper() = delete;
+    TclWrapper(const TclWrapper &) = delete;
+    TclWrapper &operator=(const TclWrapper &) = delete;
+
+    TclWrapper(pTclPipes pipes);
+    ~TclWrapper();
     
 private:
     int BiasGet(Tcl_Interp *interp, int objc, Tcl_Obj *const *objv);
     int BiasSet(Tcl_Interp *interp, int objc, Tcl_Obj *const *objv);
 
-    int initTcl();
+    void initTcl();
     void deleteTcl();
     void registerCommand();
+    void registerChannel();
 
 private:
     Tcl_Interp *m_interp;
+    pTclPipes m_pipes;
 };
 
-#endif // TCLCOMMAND_H
+#endif // TCLWRAPPER_H

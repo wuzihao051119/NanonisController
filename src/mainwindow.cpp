@@ -4,14 +4,12 @@
 
 #include "mainwindow.h"
 
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
+MainWindow::MainWindow(pTclPipes pipes, QWidget *parent) : m_pipes(pipes), QMainWindow(parent) {
     initUi();
-    initTclInterp();
     initCommand();
 }
 
 MainWindow::~MainWindow() {
-    Tcl_DeleteInterp(m_interp);
     delete m_function;
     delete m_command;
 }
@@ -57,13 +55,6 @@ void MainWindow::initUi() {
     setCentralWidget(centralWidget);
     setWindowTitle(tr("NanonisController"));
     resize(800, 600);
-}
-
-void MainWindow::initTclInterp() {
-    m_interp = Tcl_CreateInterp();
-
-    // Tcl_CreateObjCommand(m_interp, "Bias.Get", NULL, NULL, NULL);
-    // Tcl_Eval(m_interp, "Bias.Get");
 }
 
 void MainWindow::initCommand() {
