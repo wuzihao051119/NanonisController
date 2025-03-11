@@ -7,6 +7,7 @@
 MainWindow::MainWindow(pTclPipes pipes, QWidget *parent) : m_pipes(pipes), QMainWindow(parent) {
     initUi();
     initCommand();
+    initPipe();
 }
 
 MainWindow::~MainWindow() {
@@ -32,12 +33,12 @@ void MainWindow::initUi() {
     configLayout->addWidget(connectButton);
 
     QVBoxLayout *mainLayout = new QVBoxLayout;
-    QPlainTextEdit *commandTextEdit = new QPlainTextEdit;
+    commandTextEdit = new QPlainTextEdit;
     
     QHBoxLayout *submitLayout = new QHBoxLayout;
-    QLineEdit *commandlineEdit = new QLineEdit;
+    commandLineEdit = new QLineEdit;
     QPushButton *submitButton = new QPushButton(tr("Submit"));
-    submitLayout->addWidget(commandlineEdit);
+    submitLayout->addWidget(commandLineEdit);
     submitLayout->addWidget(submitButton);
 
     mainLayout->addLayout(configLayout);
@@ -62,6 +63,16 @@ void MainWindow::initCommand() {
     m_command = new Command(*m_function, m_oss);
 }
 
+void MainWindow::initPipe() {
+    writePipe = new QFile;
+    writePipe->open(m_pipes->tclInWritePipe, QIODevice::WriteOnly);
+    readPipe = new QFile;
+    readPipe->open(m_pipes->tclOutReadPipe, QIODevice::ReadOnly);
+
+    connect(commandLineEdit, &QLineEdit::textChanged, this, &MainWindow::writePipeToTcl);
+    connect(readPipe, &QFile::readyRead, this, &MainWindow::readPipeToDisplay);
+}
+
 void MainWindow::getHostAddress() {
     QString address = hostAddressLineEdit->text();
     quint16 port = portLineEdit->text().toUShort();
@@ -79,4 +90,13 @@ void MainWindow::invokeCommand() {
 void MainWindow::getResponse() {
     QByteArray &data = m_socket->m_receiveData;
     qDebug() << data;
+}
+
+void MainWindow::writePipeToTcl(const QString &text) {
+    writePipe->write(text.toLatin1());
+}
+
+void MainWindow::readPipeToDisplay() {
+    if (readPipe->bytesAvailable() != 0)
+        commandTextEdit->appendPlainText(readPipe->readAll());
 }

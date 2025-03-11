@@ -7,24 +7,22 @@
 TclPipe::TclPipe() {
     if (!CreatePipe(&hTclInReadPipe, &hTclInWritePipe, NULL, 0))
         return;
+
+    tclInWritePipe = _fdopen(_open_osfhandle((intptr_t)hTclInWritePipe, _O_TEXT), "w");
     
-    tclInRead = _fdopen(_open_osfhandle((intptr_t)hTclInReadPipe, _O_TEXT), "r");
-    tclInWrite = _fdopen(_open_osfhandle((intptr_t)hTclInWritePipe, _O_TEXT), "w");
-    
-    if (CreatePipe(&hTclOutReadPipe, &hTclOutWritePipe, NULL, 0))
+    if (!CreatePipe(&hTclOutReadPipe, &hTclOutWritePipe, NULL, 0))
         return;
 
-    tclOutRead = _fdopen(_open_osfhandle((intptr_t)hTclOutReadPipe, _O_TEXT), "r");
-    tclOutWrite = _fdopen(_open_osfhandle((intptr_t)hTclOutWritePipe, _O_TEXT), "w");
+    tclOutReadPipe = _fdopen(_open_osfhandle((intptr_t)hTclOutReadPipe, _O_TEXT), "r");
 }
 
 TclPipe::~TclPipe() {
-    fclose(tclInRead);
-    fclose(tclInWrite);
-    fclose(tclOutRead);
-    fclose(tclOutWrite);
+    CloseHandle(hTclInReadPipe);
+    fclose(tclInWritePipe);
+    fclose(tclOutReadPipe);
+    CloseHandle(hTclOutWritePipe);
 }
 
 pTclPipes TclPipe::getTclPipes() {
-    return new tclPipes { tclInRead, tclInWrite, tclOutRead, tclOutWrite };
+    return new tclPipes { hTclInReadPipe, tclInWritePipe, tclOutReadPipe, hTclOutWritePipe };
 }

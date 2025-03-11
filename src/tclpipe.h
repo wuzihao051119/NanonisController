@@ -11,10 +11,10 @@
 #include <Windows.h>
 
 struct tclPipes {
-    FILE *tclInRead;
-    FILE *tclInWrite;
-    FILE *tclOutRead;
-    FILE *tclOutWrite;
+    HANDLE hTclInReadPipe;
+    FILE *tclInWritePipe;
+    FILE *tclOutReadPipe;
+    HANDLE hTclOutWritePipe;
 };
 
 typedef tclPipes *pTclPipes;
@@ -27,16 +27,15 @@ public:
     TclPipe &operator=(const TclPipe &) = delete;
 
     pTclPipes getTclPipes();
+
 private:
     HANDLE hTclInReadPipe;
     HANDLE hTclInWritePipe;
     HANDLE hTclOutReadPipe;
     HANDLE hTclOutWritePipe;
 
-    FILE *tclInRead;
-    FILE *tclInWrite;
-    FILE *tclOutRead;
-    FILE *tclOutWrite;
+    FILE *tclInWritePipe;
+    FILE *tclOutReadPipe;
 };
 
 #endif // TCLPIPE_H

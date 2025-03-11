@@ -7,6 +7,7 @@
 
 #include <QMainWindow>
 #include <QBoxLayout>
+#include <QFile>
 #include <QLabel>
 #include <QLineEdit>
 #include <QPlainTextEdit>
@@ -32,10 +33,13 @@ private slots:
     void getHostAddress();
     void invokeCommand();
     void getResponse();
+    void writePipeToTcl(const QString &text);
+    void readPipeToDisplay();
 
 private:
     void initUi();
     void initCommand();
+    void initPipe();
     
 private:
     std::ostringstream m_oss;
@@ -46,6 +50,10 @@ private:
 
     QLineEdit *hostAddressLineEdit;
     QLineEdit *portLineEdit;
+    QPlainTextEdit* commandTextEdit;
+    QLineEdit* commandLineEdit;
+    QFile *writePipe;
+    QFile *readPipe;
 };
 
 #endif // MAINWINDOW_H

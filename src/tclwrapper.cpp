@@ -33,7 +33,12 @@ void TclWrapper::registerCommand() {
 }
 
 void TclWrapper::registerChannel() {
+    Tcl_Channel readChannel = Tcl_MakeFileChannel(m_pipes->hTclInReadPipe, TCL_READABLE);
+    Tcl_SetStdChannel(readChannel, TCL_STDIN);
 
+    Tcl_Channel writeChannel = Tcl_MakeFileChannel(m_pipes->hTclOutWritePipe, TCL_WRITABLE);
+    Tcl_SetStdChannel(writeChannel, TCL_STDOUT);
+    Tcl_SetStdChannel(writeChannel, TCL_STDERR);
 }
 
 int TclWrapper::BiasSet(Tcl_Interp *interp, int objc, Tcl_Obj *const *objv) {
