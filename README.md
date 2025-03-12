@@ -57,7 +57,7 @@ At present, NanonisController supports:
 
 ## Installing
 
-Precompiled packages are available for Window (64 bits) on the [Release page](https://github.com/wuzihao051119/NanonisController/releases).
+Precompiled packages are available for Windows (64 bits) on the [Release page](https://github.com/wuzihao051119/NanonisController/releases).
 
 ## Compiling (MSVC only now)
 
