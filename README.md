@@ -57,11 +57,12 @@ At present, NanonisController supports:
 
 ## Installing
 
-Precompiled packages are available for Window (64 bits) on the [Release page.](https://github.com/wuzihao051119/NanonisController/releases)
+Precompiled packages are available for Window (64 bits) on the [Release page](https://github.com/wuzihao051119/NanonisController/releases).
 
 ## Compiling (MSVC only now)
 
-NanonisController requires several dependencies to correctly compile for development and production builds. The following are the main pages of these dependencies.
+NanonisController requires several dependencies to correctly compile for development and production
+builds. The following are the main pages of these dependencies.
 
 * [CMake](https://cmake.org/)
 * [Qt6](https://github.com/wuzihao051119/NanonisController/releases)
@@ -78,17 +79,20 @@ cmake --install .
 
 ## Usage
 
-You can use C++, Tcl (Tool Command Language) to control the STM. The support of Python, C#, Java is under development.
+You can use C++, Tcl (Tool Command Language) to control the STM. The support of Python, C#, Java is
+under development.
 
 ## Contributing
 
-This project welcomes contributions and suggestions. You can help by looking at issues or helping review PRs.
+This project welcomes contributions and suggestions. You can help by looking at issues or helping
+review PRs.
 
 You can also contact me by [e-mail](mailto://wuzihao051119@gmail.com).
 
 ## Acknowledgements
 
-Thanks to [Lin Jiao](mailto://lin.jiao@zju.edu.cn), [CCM (Certer for Correlated Matter)](http://ccm.zju.edu.cn/) for their support during the development.
+Thanks to [Lin Jiao](mailto://lin.jiao@zju.edu.cn), [CCM (Certer for Correlated Matter)](http://ccm.zju.edu.cn/)
+for their support during the development.
 
 Thanks to my parents for bringing me up.
 
