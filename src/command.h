@@ -5,6 +5,8 @@
 #ifndef COMMAND_H
 #define COMMAND_H
 
+#include <QObject>
+
 #include <functional>
 #include <iomanip>
 #include <sstream>
@@ -12,8 +14,9 @@
 #include <unordered_map>
 #include "function.h"
 
-class Command
-{
+class Command : public QObject {
+    Q_OBJECT
+
 public:
     Command() = delete;
     Command(const Command &) = delete;
@@ -25,6 +28,9 @@ public:
 
     void invoke(const std::string &commandName, std::vector<std::string> &args);
     void makeHeader(const std::string &commandName, const int &bodySize);
+
+signals:
+    void socketSend(const QByteArray& data);
 
 private:
     std::unordered_map<std::string, std::function<void(std::vector<std::string> &)>> m_command;

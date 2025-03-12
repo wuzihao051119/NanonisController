@@ -4,15 +4,16 @@
 
 #include "mainwindow.h"
 
-MainWindow::MainWindow(pTclPipes pipes, QWidget *parent) : m_pipes(pipes), QMainWindow(parent) {
+MainWindow::MainWindow(std::ostringstream &oss, Command &command, TclWrapper& tclWrapper, QWidget *parent) :
+    m_oss(oss),
+    m_command(command),
+    m_tclWrapper(tclWrapper),
+    QMainWindow(parent) {
     initUi();
-    initCommand();
-    initPipe();
 }
 
 MainWindow::~MainWindow() {
-    delete m_function;
-    delete m_command;
+
 }
 
 void MainWindow::initUi() {
@@ -50,27 +51,12 @@ void MainWindow::initUi() {
     connect(connectButton, &QPushButton::clicked, this, &MainWindow::getHostAddress);
     connect(this, &MainWindow::socketConnect, m_socket, &Socket::connectToTcpServer);
     connect(submitButton, &QPushButton::clicked, this, &MainWindow::invokeCommand);
-    connect(this, &MainWindow::socketSendData, m_socket, &Socket::sendData);
-    connect(m_socket, &Socket::dataAvailable, this, &MainWindow::getResponse);
+    connect(&m_command, &Command::socketSend, m_socket, &Socket::sendData);
+    // connect(m_socket, &Socket::dataAvailable, this, &MainWindow::getResponse);
 
     setCentralWidget(centralWidget);
     setWindowTitle(tr("NanonisController"));
     resize(800, 600);
-}
-
-void MainWindow::initCommand() {
-    m_function = new Function(m_oss);
-    m_command = new Command(*m_function, m_oss);
-}
-
-void MainWindow::initPipe() {
-    writePipe = new QFile;
-    writePipe->open(m_pipes->tclInWritePipe, QIODevice::WriteOnly);
-    readPipe = new QFile;
-    readPipe->open(m_pipes->tclOutReadPipe, QIODevice::ReadOnly);
-
-    connect(commandLineEdit, &QLineEdit::textChanged, this, &MainWindow::writePipeToTcl);
-    connect(readPipe, &QFile::readyRead, this, &MainWindow::readPipeToDisplay);
 }
 
 void MainWindow::getHostAddress() {
@@ -81,23 +67,6 @@ void MainWindow::getHostAddress() {
 }
 
 void MainWindow::invokeCommand() {
-    std::vector<std::string> args;
-    args.emplace_back("0.000000005");
-    m_command->invoke("Bias.Set", args);
-    emit socketSendData(QByteArray::fromStdString(m_oss.str()));
-}
-
-void MainWindow::getResponse() {
-    QByteArray &data = m_socket->m_receiveData;
-    qDebug() << data;
-}
-
-void MainWindow::writePipeToTcl(const QString &text) {
-    //writePipe->write(text.toLatin1());
-    writePipe->write("Bias.Get\r\n");
-}
-
-void MainWindow::readPipeToDisplay() {
-    if (readPipe->bytesAvailable() != 0)
-        commandTextEdit->appendPlainText(readPipe->readAll());
+    m_tclWrapper.eval(commandLineEdit->text().toLatin1());
+    commandTextEdit->appendPlainText(m_tclWrapper.getResult());
 }

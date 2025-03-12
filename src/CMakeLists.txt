@@ -14,7 +14,6 @@ qt_add_executable(NanonisController
     type.cpp type.h
     socket.cpp socket.h
     tclwrapper.cpp tclwrapper.h
-    tclpipe.cpp tclpipe.h
     command.cpp command.h
     function.h format.h macro.h
     main.cpp
@@ -39,4 +38,4 @@ qt_generate_deploy_app_script(
     OUTPUT_SCRIPT deploy_script
     NO_UNSUPPORTED_PLATFORM_ERROR
 )
-install(SCRIPT deploy_script)
+install(SCRIPT ${deploy_script})

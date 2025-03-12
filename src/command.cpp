@@ -22,6 +22,8 @@ void Command::invoke(const std::string &commandName, std::vector<std::string> &a
     m_oss.str("");
 
     m_oss << header << body;
+    
+    emit socketSend(QByteArray(m_oss.str()));
 }
 
 void Command::makeHeader(const std::string &commandName, const int &bodySize) {

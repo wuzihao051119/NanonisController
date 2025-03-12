@@ -5,7 +5,6 @@
 #include <QApplication>
 #include "command.h"
 #include "mainwindow.h"
-#include "tclpipe.h"
 #include "tclwrapper.h"
 
 int main(int argc, char *argv[]) {
@@ -16,11 +15,13 @@ int main(int argc, char *argv[]) {
     QCoreApplication::setOrganizationName("CCM");
     QCoreApplication::setOrganizationDomain("ccm.zju.edu.cn");
 
-    TclPipe tclPipe;
-    pTclPipes pipes = tclPipe.getTclPipes();
-    TclWrapper tclWrapper(pipes);
+    std::ostringstream oss;
+    Function function(oss);
+    Command command(function, oss);
 
-    MainWindow window(pipes);
+    TclWrapper tclWrapper(command);
+
+    MainWindow window(oss, command, tclWrapper);
     window.show();
     return app.exec();
 }

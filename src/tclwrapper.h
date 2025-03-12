@@ -7,7 +7,8 @@
 
 #include <tcl.h>
 
-#include "tclpipe.h"
+#include "command.h"
+#include "macro.h"
 
 class TclWrapper {
 public:
@@ -15,21 +16,21 @@ public:
     TclWrapper(const TclWrapper &) = delete;
     TclWrapper &operator=(const TclWrapper &) = delete;
 
-    TclWrapper(pTclPipes pipes);
+    TclWrapper(Command &command);
     ~TclWrapper();
-    
+    void eval(const char *script);
+    char *getResult();
+
 private:
-    int BiasGet(Tcl_Interp *interp, int objc, Tcl_Obj *const *objv);
-    int BiasSet(Tcl_Interp *interp, int objc, Tcl_Obj *const *objv);
+    AddTclCommands;
 
     void initTcl();
     void deleteTcl();
-    void registerCommand();
-    void registerChannel();
+    void registerTclCommand();
 
 private:
     Tcl_Interp *m_interp;
-    pTclPipes m_pipes;
+    Command &m_command;
 };
 
 #endif // TCLWRAPPER_H

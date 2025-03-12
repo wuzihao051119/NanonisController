@@ -16,13 +16,13 @@
 #include "command.h"
 #include "function.h"
 #include "socket.h"
-#include "tclpipe.h"
+#include "tclwrapper.h"
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
 
 public:
-    MainWindow(pTclPipes pipes, QWidget *parent = nullptr);
+    MainWindow(std::ostringstream &oss, Command& command, TclWrapper &tclWrapper, QWidget *parent = nullptr);
     ~MainWindow();
     
 signals:
@@ -32,28 +32,20 @@ signals:
 private slots:
     void getHostAddress();
     void invokeCommand();
-    void getResponse();
-    void writePipeToTcl(const QString &text);
-    void readPipeToDisplay();
 
 private:
     void initUi();
-    void initCommand();
-    void initPipe();
     
 private:
-    std::ostringstream m_oss;
-    Function *m_function;
-    Command *m_command;
+    std::ostringstream &m_oss;
+    Command &m_command;
+    TclWrapper &m_tclWrapper;
     Socket *m_socket;
-    pTclPipes m_pipes;
 
     QLineEdit *hostAddressLineEdit;
     QLineEdit *portLineEdit;
     QPlainTextEdit* commandTextEdit;
     QLineEdit* commandLineEdit;
-    QFile *writePipe;
-    QFile *readPipe;
 };
 
 #endif // MAINWINDOW_H
