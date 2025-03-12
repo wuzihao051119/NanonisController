@@ -93,7 +93,8 @@ void MainWindow::getResponse() {
 }
 
 void MainWindow::writePipeToTcl(const QString &text) {
-    writePipe->write(text.toLatin1());
+    //writePipe->write(text.toLatin1());
+    writePipe->write("Bias.Get\r\n");
 }
 
 void MainWindow::readPipeToDisplay() {

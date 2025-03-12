@@ -12,6 +12,7 @@
 TclCommand::TclCommand(Tcl_Interp *interp) : m_interp(interp) {
     initTcl();
     registerCommand();
+    registerChannel();
 }
 
 TclCommand::~TclCommand() {
@@ -29,6 +30,17 @@ void TclCommand::deleteTcl() {
 void TclCommand::registerCommand() {
     Tcl_Command ret1 = Tcl_CreateObjCommand(m_interp, "Bias.Set", wrapper(BiasSet), this, NULL);
     Tcl_Command ret2 = Tcl_CreateObjCommand(m_interp, "Bias.Get", wrapper(BiasGet), this, NULL);
+}
+
+void TclCommand::registerChannel() {
+    Tcl_Channel stdoutChannel = Tcl_GetChannel(m_interp, "stdout", NULL);
+    Tcl_Channel stderrChannel = Tcl_GetChannel(m_interp, "stderr", NULL);
+    Tcl_UnregisterChannel(m_interp, stdoutChannel);
+    Tcl_UnregisterChannel(m_interp, stderrChannel);
+    Tcl_Channel outChannel = Tcl_OpenFileChannel(m_interp, "stdout.txt", "w", 644);
+    Tcl_Channel errChannel = Tcl_OpenFileChannel(m_interp, "stderr.txt", "w", 644);
+    Tcl_RegisterChannel(m_interp, outChannel);
+    Tcl_RegisterChannel(m_interp, errChannel);
 }
 
 int TclCommand::BiasSet(Tcl_Interp *interp, int objc, Tcl_Obj *const *objv) {

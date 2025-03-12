@@ -19,6 +19,7 @@ private:
     int initTcl();
     void deleteTcl();
     void registerCommand();
+    void registerChannel();
 
 private:
     Tcl_Interp *m_interp;

@@ -12,6 +12,7 @@
 TclWrapper::TclWrapper(pTclPipes pipes) : m_pipes(pipes) {
     initTcl();
     registerCommand();
+     registerChannel();
 }
 
 TclWrapper::~TclWrapper() {
@@ -33,12 +34,12 @@ void TclWrapper::registerCommand() {
 }
 
 void TclWrapper::registerChannel() {
-    Tcl_Channel readChannel = Tcl_MakeFileChannel(m_pipes->hTclInReadPipe, TCL_READABLE);
-    Tcl_SetStdChannel(readChannel, TCL_STDIN);
-
-    Tcl_Channel writeChannel = Tcl_MakeFileChannel(m_pipes->hTclOutWritePipe, TCL_WRITABLE);
-    Tcl_SetStdChannel(writeChannel, TCL_STDOUT);
-    Tcl_SetStdChannel(writeChannel, TCL_STDERR);
+    Tcl_Channel inChannel = Tcl_MakeFileChannel(m_pipes->hTclInReadPipe, TCL_READABLE);
+    Tcl_Channel outChannel = Tcl_MakeFileChannel(m_pipes->hTclOutWritePipe, TCL_WRITABLE);
+    Tcl_Channel errChannel = Tcl_MakeFileChannel(m_pipes->hTclOutWritePipe, TCL_WRITABLE);
+    Tcl_RegisterChannel(m_interp, inChannel);
+    Tcl_RegisterChannel(m_interp, outChannel);
+    Tcl_RegisterChannel(m_interp, errChannel);
 }
 
 int TclWrapper::BiasSet(Tcl_Interp *interp, int objc, Tcl_Obj *const *objv) {
