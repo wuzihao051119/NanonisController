@@ -9,56 +9,56 @@
 #include "macro.h"
 
 template <typename T, typename = void>
-struct convertTo {
+struct convertToHex {
     const T &operator()(const std::string &str) {
         return str;
     }
 };
 
 template <>
-struct convertTo<nano_string> {
+struct convertToHex<nano_string> {
     const nano_string &operator()(const std::string &str) {
         return *new nano_string(str);
     }
 };
 
 template <>
-struct convertTo<nano_int> {
+struct convertToHex<nano_int> {
     const nano_int &operator()(const std::string &str) {
         return *new nano_int(std::stoi(str));
     }
 };
 
 template <>
-struct convertTo<nano_unsigned_int16> {
+struct convertToHex<nano_unsigned_int16> {
     const nano_unsigned_int16 &operator()(const std::string &str) {
         return *new nano_unsigned_int16(std::stoi(str));
     }
 };
 
 template <>
-struct convertTo<nano_unsigned_int32> {
+struct convertToHex<nano_unsigned_int32> {
     const nano_unsigned_int32 &operator()(const std::string &str) {
         return *new nano_unsigned_int32(std::stoi(str));
     }
 };
 
 template <>
-struct convertTo<nano_float32> {
+struct convertToHex<nano_float32> {
     const nano_float32 &operator()(const std::string &str) {
         return *new nano_float32(std::stof(str));
     }
 };
 
 template <>
-struct convertTo<nano_float64> {
+struct convertToHex<nano_float64> {
     const nano_float64 &operator()(const std::string &str) {
         return *new nano_float64(std::stod(str));
     }
 };
 
 template <typename T>
-struct convertTo<T, std::enable_if_t<
+struct convertToHex<T, std::enable_if_t<
     std::is_same_v<T, nano_1D_array_string> ||
     std::is_same_v<T, nano_1D_array_int> ||
     std::is_same_v<T, nano_1D_array_unsigned_int8> ||
@@ -72,15 +72,91 @@ struct convertTo<T, std::enable_if_t<
     }
 };
 
+template <typename T, typename = void>
+struct convertFromHex {
+    const std::string operator()(const std::string &str, size_t offset) {
+        return str.substr(offset);
+    }
+};
+
+template <>
+struct convertFromHex<nano_string> {
+    const std::string operator()(const std::string &str, size_t offset) {
+        return str.substr(offset);
+    }
+};
+
+template <>
+struct convertFromHex<nano_int> {
+    const std::string operator()(const std::string &str, size_t offset) {
+        return std::to_string(*reinterpret_cast<const int *>(str.substr(offset, 4).c_str()));
+    }
+};
+
+template <>
+struct convertFromHex<nano_unsigned_int16> {
+    const std::string operator()(const std::string &str, size_t offset) {
+        return std::to_string(*reinterpret_cast<const uint16_t*>(str.substr(offset, 2).c_str()));
+    }
+};
+
+template <>
+struct convertFromHex<nano_unsigned_int32> {
+    const std::string operator()(const std::string &str, size_t offset) {
+        return std::to_string(*reinterpret_cast<const uint32_t*>(str.substr(offset, 4).c_str()));
+    }
+};
+
+template <>
+struct convertFromHex<nano_float32> {
+    const std::string operator()(const std::string &str, size_t offset) {
+        return std::to_string(*reinterpret_cast<const float*>(str.substr(offset, 4).c_str()));
+    }
+};
+
+template <>
+struct convertFromHex<nano_float64> {
+    const std::string operator()(const std::string &str, size_t offset) {
+        return std::to_string(*reinterpret_cast<const double*>(str.substr(offset, 8).c_str()));
+    }
+};
+
+template <typename T>
+struct convertFromHex<T, std::enable_if_t<
+    std::is_same_v<T, nano_1D_array_string> ||
+    std::is_same_v<T, nano_1D_array_int> ||
+    std::is_same_v<T, nano_1D_array_unsigned_int8> ||
+    std::is_same_v<T, nano_1D_array_unsigned_int32> ||
+    std::is_same_v<T, nano_1D_array_float32> ||
+    std::is_same_v<T, nano_1D_array_float64> ||
+    std::is_same_v<T, nano_2D_array_float32>
+>> {
+    const std::string operator()(const std::string &str, size_t offset) {
+        return str.substr(offset);
+    }
+};
+
 template <typename T, typename ...Ts>
 void appendArgs(std::ostream &os, std::vector<std::string> &args) {
-    os << convertTo<T>()(args.front());
+    os << convertToHex<T>()(args.front());
     args.erase(args.begin());
     appendArgs<Ts...>(os, args);
 }
 
 template <>
 inline void appendArgs<void>(std::ostream &os, std::vector<std::string> &args) {
+    return;
+}
+
+template <typename T, typename ...Ts>
+void appendDumps(std::ostream& os, const std::string &dumpBody, size_t *offset) {
+    os << convertFromHex<T>()(dumpBody, *offset) << " ";
+    *offset += sizeof(T);
+    appendDumps<Ts...>(os, dumpBody, offset);
+}
+
+template <>
+inline void appendDumps<void>(std::ostream& os, const std::string& dumpBody, size_t *offset) {
     return;
 }
 

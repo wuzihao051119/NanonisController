@@ -52,7 +52,7 @@ void MainWindow::initUi() {
     connect(this, &MainWindow::socketConnect, m_socket, &Socket::connectToTcpServer);
     connect(submitButton, &QPushButton::clicked, this, &MainWindow::invokeCommand);
     connect(&m_command, &Command::socketSend, m_socket, &Socket::sendData);
-    // connect(m_socket, &Socket::dataAvailable, this, &MainWindow::getResponse);
+    connect(m_socket, &Socket::dataAvailable, this, &MainWindow::getResponse);
 
     setCentralWidget(centralWidget);
     setWindowTitle(tr("NanonisController"));
@@ -69,4 +69,9 @@ void MainWindow::getHostAddress() {
 void MainWindow::invokeCommand() {
     m_tclWrapper.eval(commandLineEdit->text().toLatin1());
     commandTextEdit->appendPlainText(m_tclWrapper.getResult());
+}
+
+void MainWindow::getResponse(const QByteArray &data) {
+    const std::string response = m_command.dump(data.toStdString());
+    commandTextEdit->appendPlainText(QString::fromStdString(response));
 }

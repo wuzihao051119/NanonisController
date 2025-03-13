@@ -10,10 +10,17 @@
 
 #define AddCommand(Module, Func) \
     m_command.emplace(#Module "." #Func, std::bind(&Function::Module##Func, &m_function, std::placeholders::_1));
+
 #define AddFunction(Module, Func, ...) \
     inline void Module##Func(std::vector<std::string> &args) { \
         appendArgs<__VA_ARGS__ __VA_OPT__(,) void>(m_os, args); \
     }
+
+#define AddDumpFunction(Module, Func, ...) \
+    inline void Dump##Module##Func(const std::string &dumpBody, size_t *offset) { \
+        appendDumps<__VA_ARGS__ __VA_OPT__(,) void>(m_os, dumpBody, offset); \
+    }
+
 #define AddTclCommand(Module, Func) \
     inline int Module##Func(Tcl_Interp *interp, int objc, Tcl_Obj *const *objv) { \
         std::string commandName = Tcl_GetStringFromObj(objv[0], NULL); \
@@ -26,6 +33,530 @@
 
 #define RegisterTclCommand(Module, Func) \
     Tcl_CreateObjCommand(m_interp, #Module "." #Func, CallbackWrapper(Module##Func), this, NULL);
+
+#define AddDumpCommand(Module, Func) \
+    m_dumpCommand.emplace(#Module "." #Func, std::bind(&Function::Dump##Module##Func, &m_function, std::placeholders::_1, std::placeholders::_2));
+
+#define AddDumpCommands \
+    AddDumpCommand(Bias, Set); \
+    AddDumpCommand(Bias, Get); \
+    AddDumpCommand(Bias, RangeSet); \
+    AddDumpCommand(Bias, RangeGet); \
+    AddDumpCommand(Bias, CalibrSet); \
+    AddDumpCommand(Bias, CalibrGet); \
+    AddDumpCommand(Bias, Pulse); \
+    AddDumpCommand(BiasSwp, Open); \
+    AddDumpCommand(BiasSwp, Start); \
+    AddDumpCommand(BiasSwp, PropsSet); \
+    AddDumpCommand(BiasSwp, LimitsSet); \
+    AddDumpCommand(BiasSpectr, PropsGet); \
+    AddDumpCommand(BiasSpectr, AdvPropsSet); \
+    AddDumpCommand(BiasSpectr, AdvPropsGet); \
+    AddDumpCommand(BiasSpectr, LimitsSet); \
+    AddDumpCommand(BiasSpectr, LimitsGet); \
+    AddDumpCommand(BiasSpectr, TimingSet); \
+    AddDumpCommand(BiasSpectr, TimingGet); \
+    AddDumpCommand(BiasSpectr, TTLSyncSet); \
+    AddDumpCommand(BiasSpectr, TTLSyncGet); \
+    AddDumpCommand(BiasSpectr, AltZCtrlSet); \
+    AddDumpCommand(BiasSpectr, AltZCtrlGet); \
+    AddDumpCommand(BiasSpectr, MLSLockinPerSegSet); \
+    AddDumpCommand(BiasSpectr, MLSLockinPerSegGet); \
+    AddDumpCommand(BiasSpectr, MLSModeSet); \
+    AddDumpCommand(BiasSpectr, MLSModeGet); \
+    AddDumpCommand(BiasSpectr, MLSValsSet); \
+    AddDumpCommand(BiasSpectr, MLSValsGet); \
+    AddDumpCommand(KelvinCtrl, CtrlOnOffSet); \
+    AddDumpCommand(KelvinCtrl, CtrlOnOffGet); \
+    AddDumpCommand(KelvinCtrl, SetpntSet); \
+    AddDumpCommand(KelvinCtrl, SetpntGet); \
+    AddDumpCommand(KelvinCtrl, GainSet); \
+    AddDumpCommand(KelvinCtrl, GainGet); \
+    AddDumpCommand(KelvinCtrl, ModParamsSet); \
+    AddDumpCommand(KelvinCtrl, ModParamsGet); \
+    AddDumpCommand(KelvinCtrl, ModOnOffSet); \
+    AddDumpCommand(KelvinCtrl, ModOnOffGet); \
+    AddDumpCommand(KelvinCtrl, CtrlSignalSet); \
+    AddDumpCommand(KelvinCtrl, CtrlSignalGet); \
+    AddDumpCommand(KelvinCtrl, AmpGet); \
+    AddDumpCommand(KelvinCtrl, BiasLimitsSet); \
+    AddDumpCommand(KelvinCtrl, BiasLimitsGet); \
+    AddDumpCommand(CPDComp, Open); \
+    AddDumpCommand(CPDComp, Close); \
+    AddDumpCommand(CPDComp, ParamsSet); \
+    AddDumpCommand(CPDComp, ParamsGet); \
+    AddDumpCommand(CPDComp, DataGet); \
+    AddDumpCommand(Current, Get); \
+    AddDumpCommand(Current, Get100); \
+    AddDumpCommand(Current, BEEMGet); \
+    AddDumpCommand(Current, GainSet); \
+    AddDumpCommand(Current, GainsGet); \
+    AddDumpCommand(Current, CalibrSet); \
+    AddDumpCommand(Current, CalibrGet); \
+    AddDumpCommand(ZCtrl, ZPosSet); \
+    AddDumpCommand(ZCtrl, ZPosGet); \
+    AddDumpCommand(ZCtrl, OnOffSet); \
+    AddDumpCommand(ZCtrl, OnOffGet); \
+    AddDumpCommand(ZCtrl, SetpntSet); \
+    AddDumpCommand(ZCtrl, SetpntGet); \
+    AddDumpCommand(ZCtrl, GainSet); \
+    AddDumpCommand(ZCtrl, GainGet); \
+    AddDumpCommand(ZCtrl, SwitchOffDelaySet); \
+    AddDumpCommand(ZCtrl, SwitchOffDelayGet); \
+    AddDumpCommand(ZCtrl, TipLiftSet); \
+    AddDumpCommand(ZCtrl, TipLiftGet); \
+    AddDumpCommand(ZCtrl, Home); \
+    AddDumpCommand(ZCtrl, HomePropsSet); \
+    AddDumpCommand(ZCtrl, HomePropsGet); \
+    AddDumpCommand(ZCtrl, ActiveCtrlSet); \
+    AddDumpCommand(ZCtrl, CtrlListGet); \
+    AddDumpCommand(ZCtrl, Withdraw); \
+    AddDumpCommand(ZCtrl, WithdrawRateSet); \
+    AddDumpCommand(ZCtrl, WithdrawRateGet); \
+    AddDumpCommand(ZCtrl, LimitsEnabledSet); \
+    AddDumpCommand(ZCtrl, LimitsEnabledGet); \
+    AddDumpCommand(ZCtrl, LimitsSet); \
+    AddDumpCommand(ZCtrl, LimitsGet); \
+    AddDumpCommand(ZCtrl, StatusGet); \
+    AddDumpCommand(SafeTip, OnOffSet); \
+    AddDumpCommand(SafeTip, OnOffGet); \
+    AddDumpCommand(SafeTip, SignalGet); \
+    AddDumpCommand(SafeTip, PropsSet); \
+    AddDumpCommand(SafeTip, PropsGet); \
+    AddDumpCommand(AutoApproach, Open); \
+    AddDumpCommand(AutoApproach, OnOffSet); \
+    AddDumpCommand(AutoApproach, OnOffGet); \
+    AddDumpCommand(ZSpectr, Open); \
+    AddDumpCommand(ZSpectr, Start); \
+    AddDumpCommand(ZSpectr, Stop); \
+    AddDumpCommand(ZSpectr, StatusGet); \
+    AddDumpCommand(ZSpectr, ChsSet); \
+    AddDumpCommand(ZSpectr, ChsGet); \
+    AddDumpCommand(ZSpectr, PropsSet); \
+    AddDumpCommand(ZSpectr, PropsGet); \
+    AddDumpCommand(ZSpectr, AdvPropsSet); \
+    AddDumpCommand(ZSpectr, AdvPropsGet); \
+    AddDumpCommand(ZSpectr, RangeSet); \
+    AddDumpCommand(ZSpectr, RangeGet); \
+    AddDumpCommand(ZSpectr, TimingSet); \
+    AddDumpCommand(ZSpectr, TimingGet); \
+    AddDumpCommand(ZSpectr, RetractDelaySet); \
+    AddDumpCommand(ZSpectr, RetractDelayGet); \
+    AddDumpCommand(ZSpectr, RetractSet); \
+    AddDumpCommand(ZSpectr, RetractGet); \
+    AddDumpCommand(ZSpectr, Retract2ndSet); \
+    AddDumpCommand(ZSpectr, Retract2ndGet); \
+    AddDumpCommand(Piezo, TiltSet); \
+    AddDumpCommand(Piezo, TiltGet); \
+    AddDumpCommand(Piezo, RangeSet); \
+    AddDumpCommand(Piezo, RangeGet); \
+    AddDumpCommand(Piezo, SensSet); \
+    AddDumpCommand(Piezo, SensGet); \
+    AddDumpCommand(Piezo, DriftCompSet); \
+    AddDumpCommand(Piezo, DriftCompGet); \
+    AddDumpCommand(Piezo, CalibrGet); \
+    AddDumpCommand(Piezo, HVAInfoGet); \
+    AddDumpCommand(Piezo, HVAStatusLEDGet); \
+    AddDumpCommand(Scan, Action); \
+    AddDumpCommand(Scan, StatusGet); \
+    AddDumpCommand(Scan, WaitEndOfScan); \
+    AddDumpCommand(Scan, FrameSet); \
+    AddDumpCommand(Scan, FrameGet); \
+    AddDumpCommand(Scan, BufferSet); \
+    AddDumpCommand(Scan, BufferGet); \
+    AddDumpCommand(Scan, PropsSet); \
+    AddDumpCommand(Scan, PropsGet); \
+    AddDumpCommand(Scan, SpeedSet); \
+    AddDumpCommand(Scan, SpeedGet); \
+    AddDumpCommand(Scan, FrameDataGrab); \
+    AddDumpCommand(FolMe, XYPosSet); \
+    AddDumpCommand(FolMe, XYPosGet); \
+    AddDumpCommand(FolMe, SpeedSet); \
+    AddDumpCommand(FolMe, SpeedGet); \
+    AddDumpCommand(FolMe, OversamplSet); \
+    AddDumpCommand(FolMe, OversamplGet); \
+    AddDumpCommand(FolMe, Stop); \
+    AddDumpCommand(FolMe, PSOnOffGet); \
+    AddDumpCommand(FolMe, PSOnOffSet); \
+    AddDumpCommand(FolMe, PSExpGet); \
+    AddDumpCommand(FolMe, PSExpSet); \
+    AddDumpCommand(FolMe, PSPropsGet); \
+    AddDumpCommand(FolMe, PSPropsSet); \
+    AddDumpCommand(TipRec, BufferSizeSet); \
+    AddDumpCommand(TipRec, BufferSizeGet); \
+    AddDumpCommand(TipRec, BufferClear); \
+    AddDumpCommand(TipRec, DataGet); \
+    AddDumpCommand(TipRec, DataSave); \
+    AddDumpCommand(Pattern, ExpOpen); \
+    AddDumpCommand(Pattern, ExpStart); \
+    AddDumpCommand(Pattern, ExpPause); \
+    AddDumpCommand(Pattern, ExpStop); \
+    AddDumpCommand(Pattern, ExpStatusGet); \
+    AddDumpCommand(Pattern, GridSet); \
+    AddDumpCommand(Pattern, GridGet); \
+    AddDumpCommand(Pattern, LineSet); \
+    AddDumpCommand(Pattern, LineGet); \
+    AddDumpCommand(Pattern, CloudSet); \
+    AddDumpCommand(Pattern, CloudGet); \
+    AddDumpCommand(Pattern, PropsSet); \
+    AddDumpCommand(Pattern, PropsGet); \
+    AddDumpCommand(Marks, PointDraw); \
+    AddDumpCommand(Marks, PointsDraw); \
+    AddDumpCommand(Marks, LineDraw); \
+    AddDumpCommand(Marks, LinesDraw); \
+    AddDumpCommand(Marks, PointsErase); \
+    AddDumpCommand(Marks, LinesErase); \
+    AddDumpCommand(Marks, PointsVisibleSet); \
+    AddDumpCommand(Marks, LinesVisibleSet); \
+    AddDumpCommand(Marks, PointsGet); \
+    AddDumpCommand(Marks, LinesGet); \
+    AddDumpCommand(TipShaper, Start); \
+    AddDumpCommand(TipShaper, PropsSet); \
+    AddDumpCommand(TipShaper, PropsGet); \
+    AddDumpCommand(Motor, StartMove); \
+    AddDumpCommand(Motor, StartClosedLoop); \
+    AddDumpCommand(Motor, StopMove); \
+    AddDumpCommand(Motor, PosGet); \
+    AddDumpCommand(Motor, StepCounterGet); \
+    AddDumpCommand(Motor, FreqAmpGet); \
+    AddDumpCommand(Motor, FreqAmpSet); \
+    AddDumpCommand(GenSwp, AcqChsSet); \
+    AddDumpCommand(GenSwp, AcqChsGet); \
+    AddDumpCommand(GenSwp, SwpSignalSet); \
+    AddDumpCommand(GenSwp, SwpSignalGet); \
+    AddDumpCommand(GenSwp, LimitsSet); \
+    AddDumpCommand(GenSwp, LimitsGet); \
+    AddDumpCommand(GenSwp, PropsSet); \
+    AddDumpCommand(GenSwp, PropsGet); \
+    AddDumpCommand(GenSwp, Start); \
+    AddDumpCommand(GenSwp, Stop); \
+    AddDumpCommand(GenSwp, Open); \
+    AddDumpCommand(GenPICtrl, OnOffSet); \
+    AddDumpCommand(GenPICtrl, OnOffGet); \
+    AddDumpCommand(GenPICtrl, AOValSet); \
+    AddDumpCommand(GenPICtrl, AOValGet); \
+    AddDumpCommand(GenPICtrl, AOPropsSet); \
+    AddDumpCommand(GenPICtrl, AOPropsGet); \
+    AddDumpCommand(GenPICtrl, ModChSet); \
+    AddDumpCommand(GenPICtrl, ModChGet); \
+    AddDumpCommand(GenPICtrl, DemodChSet); \
+    AddDumpCommand(GenPICtrl, DemodChGet); \
+    AddDumpCommand(GenPICtrl, PropsSet); \
+    AddDumpCommand(GenPICtrl, PropsGet); \
+    AddDumpCommand(AtomTrack, CtrlSet); \
+    AddDumpCommand(AtomTrack, StatusGet); \
+    AddDumpCommand(AtomTrack, PropsSet); \
+    AddDumpCommand(AtomTrack, PropsGet); \
+    AddDumpCommand(AtomTrack, QuickCompStart); \
+    AddDumpCommand(AtomTrack, DriftComp); \
+    AddDumpCommand(LockIn, ModOnOffSet); \
+    AddDumpCommand(LockIn, ModOnOffGet); \
+    AddDumpCommand(LockIn, ModSignalSet); \
+    AddDumpCommand(LockIn, ModSignalGet); \
+    AddDumpCommand(LockIn, ModPhasRegSet); \
+    AddDumpCommand(LockIn, ModPhasRegGet); \
+    AddDumpCommand(LockIn, ModHarmonicSet); \
+    AddDumpCommand(LockIn, ModHarmonicGet); \
+    AddDumpCommand(LockIn, ModPhasSet); \
+    AddDumpCommand(LockIn, ModPhasGet); \
+    AddDumpCommand(LockIn, ModAmpSet); \
+    AddDumpCommand(LockIn, ModAmpGet); \
+    AddDumpCommand(LockIn, ModPhasFreqSet); \
+    AddDumpCommand(LockIn, ModPhasFreqGet); \
+    AddDumpCommand(LockIn, DemodSignalSet); \
+    AddDumpCommand(LockIn, DemodSignalGet); \
+    AddDumpCommand(LockIn, DemodHarmonicSet); \
+    AddDumpCommand(LockIn, DemodHarmonicGet); \
+    AddDumpCommand(LockIn, DemodHPFilterSet); \
+    AddDumpCommand(LockIn, DemodHPFilterGet); \
+    AddDumpCommand(LockIn, DemodLPFilterSet); \
+    AddDumpCommand(LockIn, DemodLPFilterGet); \
+    AddDumpCommand(LockIn, DemodPhasRegSet); \
+    AddDumpCommand(LockIn, DemodPhasRegGet); \
+    AddDumpCommand(LockIn, DemodPhasSet); \
+    AddDumpCommand(LockIn, DemodPhasGet); \
+    AddDumpCommand(LockIn, DemodSyncFilterSet); \
+    AddDumpCommand(LockIn, DemodSyncFilterGet); \
+    AddDumpCommand(LockIn, DemodRTSignalsSet); \
+    AddDumpCommand(LockIn, DemodRTSignalsGet); \
+    AddDumpCommand(LockInFreqSwp, Open); \
+    AddDumpCommand(LockInFreqSwp, Start); \
+    AddDumpCommand(LockInFreqSwp, SignalSet); \
+    AddDumpCommand(LockInFreqSwp, SignalGet); \
+    AddDumpCommand(LockInFreqSwp, LimitsSet); \
+    AddDumpCommand(LockInFreqSwp, LimitsGet); \
+    AddDumpCommand(LockInFreqSwp, PropsSet); \
+    AddDumpCommand(LockInFreqSwp, PropsGet); \
+    AddDumpCommand(PLL, InpCalibrSet); \
+    AddDumpCommand(PLL, InpCalibrGet); \
+    AddDumpCommand(PLL, InpRangeSet); \
+    AddDumpCommand(PLL, InpRangeGet); \
+    AddDumpCommand(PLL, InpPropsSet); \
+    AddDumpCommand(PLL, InpPropsGet); \
+    AddDumpCommand(PLL, AddOnOffSet); \
+    AddDumpCommand(PLL, AddOnOffGet); \
+    AddDumpCommand(PLL, OutOnOffSet); \
+    AddDumpCommand(PLL, OutOnOffGet); \
+    AddDumpCommand(PLL, ExcRangeSet); \
+    AddDumpCommand(PLL, ExcRangeGet); \
+    AddDumpCommand(PLL, ExcitationSet); \
+    AddDumpCommand(PLL, ExcitationGet); \
+    AddDumpCommand(PLL, AmpCtrlSetpntSet); \
+    AddDumpCommand(PLL, AmpCtrlSetpntGet); \
+    AddDumpCommand(PLL, AmpCtrlOnOffSet); \
+    AddDumpCommand(PLL, AmpCtrlOnOffGet); \
+    AddDumpCommand(PLL, AmpCtrlGainSet); \
+    AddDumpCommand(PLL, AmpCtrlGainGet); \
+    AddDumpCommand(PLL, AmpCtrlBandwidthSet); \
+    AddDumpCommand(PLL, AmpCtrlBandwidthGet); \
+    AddDumpCommand(PLL, PhasCtrlOnOffSet); \
+    AddDumpCommand(PLL, PhasCtrlOnOffGet); \
+    AddDumpCommand(PLL, PhasCtrlGainSet); \
+    AddDumpCommand(PLL, PhasCtrlGainGet); \
+    AddDumpCommand(PLL, PhasCtrlBandwidthSet); \
+    AddDumpCommand(PLL, PhasCtrlBandwidthGet); \
+    AddDumpCommand(PLL, FreqRangeSet); \
+    AddDumpCommand(PLL, FreqRangeGet); \
+    AddDumpCommand(PLL, CenterFreqSet); \
+    AddDumpCommand(PLL, CenterFreqGet); \
+    AddDumpCommand(PLL, FreqShiftSet); \
+    AddDumpCommand(PLL, FreqShiftGet); \
+    AddDumpCommand(PLL, FreqShiftAutoCenter); \
+    AddDumpCommand(PLL, FreqExcOverwriteSet); \
+    AddDumpCommand(PLL, FreqExcOverwriteGet); \
+    AddDumpCommand(PLL, DemodInputSet); \
+    AddDumpCommand(PLL, DemodInputGet); \
+    AddDumpCommand(PLL, DemodHarmonicSet); \
+    AddDumpCommand(PLL, DemodHarmonicGet); \
+    AddDumpCommand(PLL, DemodPhasRefSet); \
+    AddDumpCommand(PLL, DemodPhasRefGet); \
+    AddDumpCommand(PLL, DemodFilterSet); \
+    AddDumpCommand(PLL, DemodFilterGet); \
+    AddDumpCommand(PLLQCtrl, AccessRequest); \
+    AddDumpCommand(PLLQCtrl, AccessGet); \
+    AddDumpCommand(PLLQCtrl, OnOffSet); \
+    AddDumpCommand(PLLQCtrl, OnOffGet); \
+    AddDumpCommand(PLLQCtrl, QGainSet); \
+    AddDumpCommand(PLLQCtrl, QGainGet); \
+    AddDumpCommand(PLLQCtrl, PhaseSet); \
+    AddDumpCommand(PLLQCtrl, PhaseGet); \
+    AddDumpCommand(PLLFreqSwp, Open); \
+    AddDumpCommand(PLLFreqSwp, ParamsSet); \
+    AddDumpCommand(PLLFreqSwp, ParamsGet); \
+    AddDumpCommand(PLLFreqSwp, Start); \
+    AddDumpCommand(PLLFreqSwp, Stop); \
+    AddDumpCommand(PLLPhasSwp, Start); \
+    AddDumpCommand(PLLPhasSwp, Stop); \
+    AddDumpCommand(PLLSignalAnlzr, Open); \
+    AddDumpCommand(PLLSignalAnlzr, ChSet); \
+    AddDumpCommand(PLLSignalAnlzr, ChGet); \
+    AddDumpCommand(PLLSignalAnlzr, TimebaseSet); \
+    AddDumpCommand(PLLSignalAnlzr, TimebaseGet); \
+    AddDumpCommand(PLLSignalAnlzr, TrigAuto); \
+    AddDumpCommand(PLLSignalAnlzr, TrigRearm); \
+    AddDumpCommand(PLLSignalAnlzr, TrigSet); \
+    AddDumpCommand(PLLSignalAnlzr, TrigGet); \
+    AddDumpCommand(PLLSignalAnlzr, OsciDataGet); \
+    AddDumpCommand(PLLSignalAnlzr, FFTPropsSet); \
+    AddDumpCommand(PLLSignalAnlzr, FFTPropsGet); \
+    AddDumpCommand(PLLSignalAnlzr, FFTAvgRestart); \
+    AddDumpCommand(PLLSignalAnlzr, FFTDataGet); \
+    AddDumpCommand(PLLZoomFFT, Open); \
+    AddDumpCommand(PLLZoomFFT, ChSet); \
+    AddDumpCommand(PLLZoomFFT, ChGet); \
+    AddDumpCommand(PLLZoomFFT, AvgRestart); \
+    AddDumpCommand(PLLZoomFFT, PropsSet); \
+    AddDumpCommand(PLLZoomFFT, PropsGet); \
+    AddDumpCommand(PLLZoomFFT, DataGet); \
+    AddDumpCommand(OCSync, AnglesSet); \
+    AddDumpCommand(OCSync, AnglesGet); \
+    AddDumpCommand(OCSync, LinkAnglesSet); \
+    AddDumpCommand(OCSync, LinkAnglesGet); \
+    AddDumpCommand(Script, Load); \
+    AddDumpCommand(Script, Save); \
+    AddDumpCommand(Script, Deploy); \
+    AddDumpCommand(Script, Undeploy); \
+    AddDumpCommand(Script, Run); \
+    AddDumpCommand(Script, Stop); \
+    AddDumpCommand(Script, ChsGet); \
+    AddDumpCommand(Script, ChsSet); \
+    AddDumpCommand(Script, DataGet); \
+    AddDumpCommand(Script, Autosave); \
+    AddDumpCommand(Interf, CtrlOnOffSet); \
+    AddDumpCommand(Interf, CtrlOnOffGet); \
+    AddDumpCommand(Interf, CtrlPropsSet); \
+    AddDumpCommand(Interf, CtrlPropsGet); \
+    AddDumpCommand(Interf, WPiezoSet); \
+    AddDumpCommand(Interf, WPiezoGet); \
+    AddDumpCommand(Interf, ValGet); \
+    AddDumpCommand(Interf, CtrlCalibrOpen); \
+    AddDumpCommand(Interf, CtrlReset); \
+    AddDumpCommand(Interf, CtrlNullDefl); \
+    AddDumpCommand(Laser, OnOffSet); \
+    AddDumpCommand(Laser, OnOffGet); \
+    AddDumpCommand(Laser, PropsSet); \
+    AddDumpCommand(Laser, PropsGet); \
+    AddDumpCommand(Laser, PowerGet); \
+    AddDumpCommand(BeamDefl, HorConfigSet); \
+    AddDumpCommand(BeamDefl, HorConfigGet); \
+    AddDumpCommand(BeamDefl, VerConfigSet); \
+    AddDumpCommand(BeamDefl, VerConfigGet); \
+    AddDumpCommand(BeamDefl, IntConfigSet); \
+    AddDumpCommand(BeamDefl, IntConfigGet); \
+    AddDumpCommand(BeamDefl, AutoOffset); \
+    AddDumpCommand(Signals, NamesGet); \
+    AddDumpCommand(Signals, InSlotSet); \
+    AddDumpCommand(Signals, InSlotsGet); \
+    AddDumpCommand(Signals, CalibrGet); \
+    AddDumpCommand(Signals, RangeGet); \
+    AddDumpCommand(Signals, ValGet); \
+    AddDumpCommand(Signals, ValsGet); \
+    AddDumpCommand(Signals, MeasNamesGet); \
+    AddDumpCommand(Signals, AddRTGet); \
+    AddDumpCommand(Signals, AddRTSet); \
+    AddDumpCommand(UserIn, CalibrSet); \
+    AddDumpCommand(UserOut, ModeSet); \
+    AddDumpCommand(UserOut, ModeGet); \
+    AddDumpCommand(UserOut, MonitorChSet); \
+    AddDumpCommand(UserOut, MonitorChGet); \
+    AddDumpCommand(UserOut, ValSet); \
+    AddDumpCommand(UserOut, CalibrSet); \
+    AddDumpCommand(UserOut, CalcSignalNameSet); \
+    AddDumpCommand(UserOut, CalcSignalNameGet); \
+    AddDumpCommand(UserOut, CalcSignalConfigSet); \
+    AddDumpCommand(UserOut, CalcSignalConfigGet); \
+    AddDumpCommand(UserOut, LimitsSet); \
+    AddDumpCommand(UserOut, LimitsGet); \
+    AddDumpCommand(DigLines, PropsSet); \
+    AddDumpCommand(DigLines, OutStatusSet); \
+    AddDumpCommand(DigLines, TTLValGet); \
+    AddDumpCommand(DigLines, Pulse); \
+    AddDumpCommand(DataLog, Open); \
+    AddDumpCommand(DataLog, Start); \
+    AddDumpCommand(DataLog, Stop); \
+    AddDumpCommand(DataLog, StatusGet); \
+    AddDumpCommand(DataLog, ChsSet); \
+    AddDumpCommand(DataLog, ChsGet); \
+    AddDumpCommand(DataLog, PropsSet); \
+    AddDumpCommand(DataLog, PropsGet); \
+    AddDumpCommand(TCPLog, Start); \
+    AddDumpCommand(TCPLog, Stop); \
+    AddDumpCommand(TCPLog, ChsSet); \
+    AddDumpCommand(TCPLog, OversamplSet); \
+    AddDumpCommand(TCPLog, StatusGet); \
+    AddDumpCommand(OsciHR, ChSet); \
+    AddDumpCommand(OsciHR, ChGet); \
+    AddDumpCommand(OsciHR, OversamplSet); \
+    AddDumpCommand(OsciHR, OversamplGet); \
+    AddDumpCommand(OsciHR, CalibrModeSet); \
+    AddDumpCommand(OsciHR, CalibrModeGet); \
+    AddDumpCommand(OsciHR, SamplesSet); \
+    AddDumpCommand(OsciHR, SamplesGet); \
+    AddDumpCommand(OsciHR, PreTrigSet); \
+    AddDumpCommand(OsciHR, PreTrigGet); \
+    AddDumpCommand(OsciHR, Run); \
+    AddDumpCommand(OsciHR, OsciDataGet); \
+    AddDumpCommand(OsciHR, TrigModeSet); \
+    AddDumpCommand(OsciHR, TrigModeGet); \
+    AddDumpCommand(OsciHR, TrigLevChSet); \
+    AddDumpCommand(OsciHR, TrigLevChGet); \
+    AddDumpCommand(OsciHR, TrigLevValSet); \
+    AddDumpCommand(OsciHR, TrigLevValGet); \
+    AddDumpCommand(OsciHR, TrigLevHystSet); \
+    AddDumpCommand(OsciHR, TrigLevHystGet); \
+    AddDumpCommand(OsciHR, TrigLevSlopeSet); \
+    AddDumpCommand(OsciHR, TrigLevSlopeGet); \
+    AddDumpCommand(OsciHR, TrigDigChSet); \
+    AddDumpCommand(OsciHR, TrigDigChGet); \
+    AddDumpCommand(OsciHR, TrigArmModeSet); \
+    AddDumpCommand(OsciHR, TrigArmModeGet); \
+    AddDumpCommand(OsciHR, TrigDigSlopeSet); \
+    AddDumpCommand(OsciHR, TrigDigSlopeGet); \
+    AddDumpCommand(OsciHR, TrigRearm); \
+    AddDumpCommand(OsciHR, PSDShow); \
+    AddDumpCommand(OsciHR, PSDWeightSet); \
+    AddDumpCommand(OsciHR, PSDWeightGet); \
+    AddDumpCommand(OsciHR, PSDWindowSet); \
+    AddDumpCommand(OsciHR, PSDWindowGet); \
+    AddDumpCommand(OsciHR, PSDAvrgTypeSet); \
+    AddDumpCommand(OsciHR, PSDAvrgTypeGet); \
+    AddDumpCommand(OsciHR, PSDAvrgCountSet); \
+    AddDumpCommand(OsciHR, PSDAvrgCountGet); \
+    AddDumpCommand(OsciHR, PSDAvrgRestart); \
+    AddDumpCommand(OsciHR, PSDDataGet); \
+    AddDumpCommand(Osci1T, ChSet); \
+    AddDumpCommand(Osci1T, ChGet); \
+    AddDumpCommand(Osci1T, TimebaseSet); \
+    AddDumpCommand(Osci1T, TimebaseGet); \
+    AddDumpCommand(Osci1T, TrigSet); \
+    AddDumpCommand(Osci1T, TrigGet); \
+    AddDumpCommand(Osci1T, Run); \
+    AddDumpCommand(Osci1T, DataGet); \
+    AddDumpCommand(Osci2T, ChsSet); \
+    AddDumpCommand(Osci2T, ChsGet); \
+    AddDumpCommand(Osci2T, TimebaseSet); \
+    AddDumpCommand(Osci2T, TimebaseGet); \
+    AddDumpCommand(Osci2T, OversamplSet); \
+    AddDumpCommand(Osci2T, OversamplGet); \
+    AddDumpCommand(Osci2T, TrigSet); \
+    AddDumpCommand(Osci2T, TrigGet); \
+    AddDumpCommand(Osci2T, Run); \
+    AddDumpCommand(Osci2T, DataGet); \
+    AddDumpCommand(SignalChart, Open); \
+    AddDumpCommand(SignalChart, ChsSet); \
+    AddDumpCommand(SignalChart, ChsGet); \
+    AddDumpCommand(SpectrumAnlzr, ChSet); \
+    AddDumpCommand(SpectrumAnlzr, ChGet); \
+    AddDumpCommand(SpectrumAnlzr, FreqRangeSet); \
+    AddDumpCommand(SpectrumAnlzr, FreqRangeGet); \
+    AddDumpCommand(SpectrumAnlzr, FreqResSet); \
+    AddDumpCommand(SpectrumAnlzr, FreqResGet); \
+    AddDumpCommand(SpectrumAnlzr, FFTWindowSet); \
+    AddDumpCommand(SpectrumAnlzr, FFTWindowGet); \
+    AddDumpCommand(SpectrumAnlzr, AveragSet); \
+    AddDumpCommand(SpectrumAnlzr, AveragGet); \
+    AddDumpCommand(SpectrumAnlzr, ACCouplingSet); \
+    AddDumpCommand(SpectrumAnlzr, ACCouplingGet); \
+    AddDumpCommand(SpectrumAnlzr, CursorPosSet); \
+    AddDumpCommand(SpectrumAnlzr, CursorPosGet); \
+    AddDumpCommand(SpectrumAnlzr, BandRMSGet); \
+    AddDumpCommand(SpectrumAnlzr, DCGet); \
+    AddDumpCommand(SpectrumAnlzr, Run); \
+    AddDumpCommand(SpectrumAnlzr, DataGet); \
+    AddDumpCommand(FunGen1Ch, Start); \
+    AddDumpCommand(FunGen1Ch, Stop); \
+    AddDumpCommand(FunGen1Ch, StatusGet); \
+    AddDumpCommand(FunGen1Ch, PropsSet); \
+    AddDumpCommand(FunGen1Ch, PropsGet); \
+    AddDumpCommand(FunGen1Ch, IdleSet); \
+    AddDumpCommand(FunGen1Ch, IdleGet); \
+    AddDumpCommand(FunGen2Ch, Start); \
+    AddDumpCommand(FunGen2Ch, Stop); \
+    AddDumpCommand(FunGen2Ch, StatusGet); \
+    AddDumpCommand(FunGen2Ch, IdleSet); \
+    AddDumpCommand(FunGen2Ch, IdleGet); \
+    AddDumpCommand(FunGen2Ch, OnOffSet); \
+    AddDumpCommand(FunGen2Ch, OnOffGet); \
+    AddDumpCommand(FunGen2Ch, SignalSet); \
+    AddDumpCommand(FunGen2Ch, SignalGet); \
+    AddDumpCommand(FunGen2Ch, PropsSet); \
+    AddDumpCommand(FunGen2Ch, PropsGet); \
+    AddDumpCommand(FunGen2Ch, WaveformSet); \
+    AddDumpCommand(FunGen2Ch, WaveformGet); \
+    AddDumpCommand(Util, SessionPathGet); \
+    AddDumpCommand(Util, SettingsLoad); \
+    AddDumpCommand(Util, SettingsSave); \
+    AddDumpCommand(Util, LayoutLoad); \
+    AddDumpCommand(Util, LayoutSave); \
+    AddDumpCommand(Util, Lock); \
+    AddDumpCommand(Util, UnLock); \
+    AddDumpCommand(Util, RTFreqSet); \
+    AddDumpCommand(Util, RTFreqGet); \
+    AddDumpCommand(Util, AcqPeriodSet); \
+    AddDumpCommand(Util, AcqPeriodGet); \
+    AddDumpCommand(Util, RTOversamplSet); \
+    AddDumpCommand(Util, RTOversamplGet); \
+    AddDumpCommand(Util, Quit);
 
 #define AddTclCommands \
     AddTclCommand(Bias, Set); \
@@ -71,11 +602,11 @@
     AddTclCommand(KelvinCtrl, AmpGet); \
     AddTclCommand(KelvinCtrl, BiasLimitsSet); \
     AddTclCommand(KelvinCtrl, BiasLimitsGet); \
-    AddTclCommand(PDComp, Open); \
-    AddTclCommand(PDComp, Close); \
-    AddTclCommand(PDComp, ParamsSet); \
-    AddTclCommand(PDComp, ParamsGet); \
-    AddTclCommand(PDComp, DataGet); \
+    AddTclCommand(CPDComp, Open); \
+    AddTclCommand(CPDComp, Close); \
+    AddTclCommand(CPDComp, ParamsSet); \
+    AddTclCommand(CPDComp, ParamsGet); \
+    AddTclCommand(CPDComp, DataGet); \
     AddTclCommand(Current, Get); \
     AddTclCommand(Current, Get100); \
     AddTclCommand(Current, BEEMGet); \
@@ -592,11 +1123,11 @@
     RegisterTclCommand(KelvinCtrl, AmpGet); \
     RegisterTclCommand(KelvinCtrl, BiasLimitsSet); \
     RegisterTclCommand(KelvinCtrl, BiasLimitsGet); \
-    RegisterTclCommand(PDComp, Open); \
-    RegisterTclCommand(PDComp, Close); \
-    RegisterTclCommand(PDComp, ParamsSet); \
-    RegisterTclCommand(PDComp, ParamsGet); \
-    RegisterTclCommand(PDComp, DataGet); \
+    RegisterTclCommand(CPDComp, Open); \
+    RegisterTclCommand(CPDComp, Close); \
+    RegisterTclCommand(CPDComp, ParamsSet); \
+    RegisterTclCommand(CPDComp, ParamsGet); \
+    RegisterTclCommand(CPDComp, DataGet); \
     RegisterTclCommand(Current, Get); \
     RegisterTclCommand(Current, Get100); \
     RegisterTclCommand(Current, BEEMGet); \
@@ -1113,11 +1644,11 @@
     AddCommand(KelvinCtrl, AmpGet); \
     AddCommand(KelvinCtrl, BiasLimitsSet); \
     AddCommand(KelvinCtrl, BiasLimitsGet); \
-    AddCommand(PDComp, Open); \
-    AddCommand(PDComp, Close); \
-    AddCommand(PDComp, ParamsSet); \
-    AddCommand(PDComp, ParamsGet); \
-    AddCommand(PDComp, DataGet); \
+    AddCommand(CPDComp, Open); \
+    AddCommand(CPDComp, Close); \
+    AddCommand(CPDComp, ParamsSet); \
+    AddCommand(CPDComp, ParamsGet); \
+    AddCommand(CPDComp, DataGet); \
     AddCommand(Current, Get); \
     AddCommand(Current, Get100); \
     AddCommand(Current, BEEMGet); \
@@ -1648,12 +2179,12 @@
     AddFunction(KelvinCtrl, BiasLimitsSet, nano_float32, nano_float32); \
     AddFunction(KelvinCtrl, BiasLimitsGet);
 
-#define AddPDCompFunctions \
-    AddFunction(PDComp, Open); \
-    AddFunction(PDComp, Close); \
-    AddFunction(PDComp, ParamsSet, nano_float32, nano_float32, nano_int); \
-    AddFunction(PDComp, ParamsGet); \
-    AddFunction(PDComp, DataGet);
+#define AddCPDCompFunctions \
+    AddFunction(CPDComp, Open); \
+    AddFunction(CPDComp, Close); \
+    AddFunction(CPDComp, ParamsSet, nano_float32, nano_float32, nano_int); \
+    AddFunction(CPDComp, ParamsGet); \
+    AddFunction(CPDComp, DataGet);
 
 #define AddCurrentFunctions \
     AddFunction(Current, Get); \
@@ -2212,12 +2743,635 @@
     AddFunction(Util, RTOversamplGet); \
     AddFunction(Util, Quit, nano_unsigned_int32, nano_int, nano_string, nano_int, nano_string, nano_unsigned_int32);
 
+#define AddDumpBiasFunctions \
+    AddDumpFunction(Bias, Set); \
+    AddDumpFunction(Bias, Get, nano_float32); \
+    AddDumpFunction(Bias, RangeSet); \
+    AddDumpFunction(Bias, RangeGet, nano_int, nano_int, nano_1D_array_string, nano_unsigned_int16); \
+    AddDumpFunction(Bias, CalibrSet); \
+    AddDumpFunction(Bias, CalibrGet, nano_float32, nano_float32); \
+    AddDumpFunction(Bias, Pulse);
+
+#define AddDumpBiasSwpFunctions \
+    AddDumpFunction(BiasSwp, Open); \
+    AddDumpFunction(BiasSwp, Start, nano_int, nano_int, nano_1D_array_string, nano_int, nano_int, nano_2D_array_float32); \
+    AddDumpFunction(BiasSwp, PropsSet); \
+    AddDumpFunction(BiasSwp, LimitsSet);
+
+#define AddDumpBiasSpectrFunctions \
+    AddDumpFunction(BiasSpectr, Open); \
+    AddDumpFunction(BiasSpectr, Start, nano_int, nano_int, nano_1D_array_string, nano_int, nano_int, nano_2D_array_float32, nano_int, nano_1D_array_float32); \
+    AddDumpFunction(BiasSpectr, Stop); \
+    AddDumpFunction(BiasSpectr, StatusGet, nano_unsigned_int32); \
+    AddDumpFunction(BiasSpectr, ChsSet); \
+    AddDumpFunction(BiasSpectr, ChsGet, nano_int, nano_1D_array_int); \
+    AddDumpFunction(BiasSpectr, PropsSet); \
+    AddDumpFunction(BiasSpectr, PropsGet, nano_unsigned_int16, nano_int, nano_unsigned_int16, nano_int, nano_int, nano_int, nano_1D_array_string, nano_int, nano_int, nano_1D_array_string, nano_int, nano_int, nano_1D_array_string); \
+    AddDumpFunction(BiasSpectr, AdvPropsSet); \
+    AddDumpFunction(BiasSpectr, AdvPropsGet, nano_unsigned_int16, nano_unsigned_int16, nano_unsigned_int16, nano_unsigned_int16); \
+    AddDumpFunction(BiasSpectr, LimitsSet); \
+    AddDumpFunction(BiasSpectr, LimitsGet, nano_float32, nano_float32); \
+    AddDumpFunction(BiasSpectr, TimingSet); \
+    AddDumpFunction(BiasSpectr, TimingGet, nano_float32, nano_float32, nano_float32, nano_float32, nano_float32, nano_float32, nano_float32, nano_float32); \
+    AddDumpFunction(BiasSpectr, TTLSyncSet); \
+    AddDumpFunction(BiasSpectr, TTLSyncGet, nano_unsigned_int16, nano_unsigned_int16, nano_unsigned_int16, nano_float32, nano_float32); \
+    AddDumpFunction(BiasSpectr, AltZCtrlSet); \
+    AddDumpFunction(BiasSpectr, AltZCtrlGet, nano_unsigned_int16, nano_float32, nano_float32); \
+    AddDumpFunction(BiasSpectr, MLSLockinPerSegSet); \
+    AddDumpFunction(BiasSpectr, MLSLockinPerSegGet, nano_unsigned_int32); \
+    AddDumpFunction(BiasSpectr, MLSModeSet); \
+    AddDumpFunction(BiasSpectr, MLSModeGet, nano_int, nano_string); \
+    AddDumpFunction(BiasSpectr, MLSValsSet); \
+    AddDumpFunction(BiasSpectr, MLSValsGet, nano_int, nano_1D_array_float32, nano_1D_array_float32, nano_1D_array_float32, nano_1D_array_float32, nano_1D_array_float32, nano_1D_array_int, nano_1D_array_unsigned_int32);
+
+#define AddDumpKelvinCtrlFunctions \
+    AddDumpFunction(KelvinCtrl, CtrlOnOffSet); \
+    AddDumpFunction(KelvinCtrl, CtrlOnOffGet, nano_unsigned_int32); \
+    AddDumpFunction(KelvinCtrl, SetpntSet); \
+    AddDumpFunction(KelvinCtrl, SetpntGet, nano_float32); \
+    AddDumpFunction(KelvinCtrl, GainSet); \
+    AddDumpFunction(KelvinCtrl, GainGet, nano_float32, nano_float32, nano_unsigned_int16); \
+    AddDumpFunction(KelvinCtrl, ModParamsSet); \
+    AddDumpFunction(KelvinCtrl, ModParamsGet, nano_float32, nano_float32, nano_float32); \
+    AddDumpFunction(KelvinCtrl, ModOnOffSet); \
+    AddDumpFunction(KelvinCtrl, ModOnOffGet, nano_unsigned_int16, nano_unsigned_int16); \
+    AddDumpFunction(KelvinCtrl, CtrlSignalSet); \
+    AddDumpFunction(KelvinCtrl, CtrlSignalGet, nano_int); \
+    AddDumpFunction(KelvinCtrl, AmpGet, nano_float32); \
+    AddDumpFunction(KelvinCtrl, BiasLimitsSet); \
+    AddDumpFunction(KelvinCtrl, BiasLimitsGet, nano_float32, nano_float32);
+
+#define AddDumpCPDCompFunctions \
+    AddDumpFunction(CPDComp, Open); \
+    AddDumpFunction(CPDComp, Close); \
+    AddDumpFunction(CPDComp, ParamsSet); \
+    AddDumpFunction(CPDComp, ParamsGet, nano_float32, nano_float32, nano_int); \
+    AddDumpFunction(CPDComp, DataGet, nano_int, nano_1D_array_float32, nano_1D_array_float32, nano_1D_array_float32, nano_int, nano_1D_array_float32, nano_1D_array_float32, nano_1D_array_float32, nano_float32, nano_float64, nano_float64);
+
+#define AddDumpCurrentFunctions \
+    AddDumpFunction(Current, Get, nano_float32); \
+    AddDumpFunction(Current, Get100, nano_float32); \
+    AddDumpFunction(Current, BEEMGet, nano_float32); \
+    AddDumpFunction(Current, GainSet); \
+    AddDumpFunction(Current, GainsGet, nano_int, nano_int, nano_1D_array_string, nano_unsigned_int16); \
+    AddDumpFunction(Current, CalibrSet); \
+    AddDumpFunction(Current, CalibrGet, nano_float64, nano_float64);
+
+#define AddDumpZCtrlFunctions \
+    AddDumpFunction(ZCtrl, ZPosSet); \
+    AddDumpFunction(ZCtrl, ZPosGet, nano_float32); \
+    AddDumpFunction(ZCtrl, OnOffSet); \
+    AddDumpFunction(ZCtrl, OnOffGet, nano_unsigned_int32); \
+    AddDumpFunction(ZCtrl, SetpntSet); \
+    AddDumpFunction(ZCtrl, SetpntGet, nano_float32); \
+    AddDumpFunction(ZCtrl, GainSet); \
+    AddDumpFunction(ZCtrl, GainGet, nano_float32, nano_float32, nano_float32); \
+    AddDumpFunction(ZCtrl, SwitchOffDelaySet); \
+    AddDumpFunction(ZCtrl, SwitchOffDelayGet, nano_float32); \
+    AddDumpFunction(ZCtrl, TipLiftSet); \
+    AddDumpFunction(ZCtrl, TipLiftGet, nano_float32); \
+    AddDumpFunction(ZCtrl, Home); \
+    AddDumpFunction(ZCtrl, HomePropsSet); \
+    AddDumpFunction(ZCtrl, HomePropsGet, nano_unsigned_int16, nano_float32); \
+    AddDumpFunction(ZCtrl, ActiveCtrlSet); \
+    AddDumpFunction(ZCtrl, CtrlListGet, nano_int, nano_int, nano_1D_array_string, nano_int); \
+    AddDumpFunction(ZCtrl, Withdraw); \
+    AddDumpFunction(ZCtrl, WithdrawRateSet); \
+    AddDumpFunction(ZCtrl, WithdrawRateGet, nano_float32); \
+    AddDumpFunction(ZCtrl, LimitsEnabledSet); \
+    AddDumpFunction(ZCtrl, LimitsEnabledGet, nano_unsigned_int32); \
+    AddDumpFunction(ZCtrl, LimitsSet); \
+    AddDumpFunction(ZCtrl, LimitsGet, nano_float32, nano_float32); \
+    AddDumpFunction(ZCtrl, StatusGet, nano_unsigned_int16);
+
+#define AddDumpSafeTipFunctions \
+    AddDumpFunction(SafeTip, OnOffSet); \
+    AddDumpFunction(SafeTip, OnOffGet, nano_unsigned_int16); \
+    AddDumpFunction(SafeTip, SignalGet, nano_float32); \
+    AddDumpFunction(SafeTip, PropsSet); \
+    AddDumpFunction(SafeTip, PropsGet, nano_unsigned_int16, nano_unsigned_int16, nano_float32);
+
+#define AddDumpAutoApproachFunctions \
+    AddDumpFunction(AutoApproach, Open); \
+    AddDumpFunction(AutoApproach, OnOffSet); \
+    AddDumpFunction(AutoApproach, OnOffGet, nano_unsigned_int16);
+
+#define AddDumpZSpectrFunctions \
+    AddDumpFunction(ZSpectr, Open); \
+    AddDumpFunction(ZSpectr, Start, nano_int, nano_int, nano_1D_array_string, nano_int, nano_int, nano_2D_array_float32, nano_int, nano_1D_array_float32); \
+    AddDumpFunction(ZSpectr, Stop); \
+    AddDumpFunction(ZSpectr, StatusGet, nano_unsigned_int32); \
+    AddDumpFunction(ZSpectr, ChsSet); \
+    AddDumpFunction(ZSpectr, ChsGet, nano_int, nano_1D_array_int); \
+    AddDumpFunction(ZSpectr, PropsSet); \
+    AddDumpFunction(ZSpectr, PropsGet, nano_unsigned_int16, nano_int, nano_int, nano_int, nano_1D_array_string, nano_int, nano_int, nano_1D_array_string, nano_int, nano_int, nano_1D_array_string, nano_unsigned_int16, nano_unsigned_int16); \
+    AddDumpFunction(ZSpectr, AdvPropsSet); \
+    AddDumpFunction(ZSpectr, AdvPropsGet, nano_float32, nano_unsigned_int16, nano_unsigned_int16, nano_unsigned_int16); \
+    AddDumpFunction(ZSpectr, RangeSet); \
+    AddDumpFunction(ZSpectr, RangeGet, nano_float32, nano_float32); \
+    AddDumpFunction(ZSpectr, TimingSet); \
+    AddDumpFunction(ZSpectr, TimingGet, nano_float32, nano_float32, nano_float32, nano_float32, nano_float32, nano_float32, nano_float32); \
+    AddDumpFunction(ZSpectr, RetractDelaySet); \
+    AddDumpFunction(ZSpectr, RetractDelayGet, nano_float32); \
+    AddDumpFunction(ZSpectr, RetractSet); \
+    AddDumpFunction(ZSpectr, RetractGet, nano_unsigned_int16, nano_float32, nano_int, nano_unsigned_int16); \
+    AddDumpFunction(ZSpectr, Retract2ndSet); \
+    AddDumpFunction(ZSpectr, Retract2ndGet, nano_int, nano_float32, nano_int, nano_unsigned_int16);
+
+#define AddDumpPiezoFunctions \
+    AddDumpFunction(Piezo, TiltSet); \
+    AddDumpFunction(Piezo, TiltGet, nano_float32, nano_float32); \
+    AddDumpFunction(Piezo, RangeSet); \
+    AddDumpFunction(Piezo, RangeGet, nano_float32, nano_float32, nano_float32); \
+    AddDumpFunction(Piezo, SensSet); \
+    AddDumpFunction(Piezo, SensGet, nano_float32, nano_float32, nano_float32); \
+    AddDumpFunction(Piezo, DriftCompSet); \
+    AddDumpFunction(Piezo, DriftCompGet, nano_unsigned_int32, nano_float32, nano_float32, nano_float32, nano_unsigned_int32, nano_unsigned_int32, nano_unsigned_int32); \
+    AddDumpFunction(Piezo, CalibrGet, nano_float32, nano_float32, nano_float32); \
+    AddDumpFunction(Piezo, HVAInfoGet, nano_float32, nano_float32, nano_float32, nano_float32, nano_unsigned_int32, nano_unsigned_int32, nano_unsigned_int32); \
+    AddDumpFunction(Piezo, HVAStatusLEDGet, nano_unsigned_int32, nano_unsigned_int32, nano_unsigned_int32, nano_unsigned_int32);
+
+#define AddDumpScanFunctions \
+    AddDumpFunction(Scan, Action); \
+    AddDumpFunction(Scan, StatusGet, nano_unsigned_int32); \
+    AddDumpFunction(Scan, WaitEndOfScan, nano_unsigned_int32, nano_unsigned_int32, nano_string); \
+    AddDumpFunction(Scan, FrameSet); \
+    AddDumpFunction(Scan, FrameGet, nano_float32, nano_float32, nano_float32, nano_float32, nano_float32); \
+    AddDumpFunction(Scan, BufferSet); \
+    AddDumpFunction(Scan, BufferGet, nano_int, nano_1D_array_int, nano_int, nano_int); \
+    AddDumpFunction(Scan, PropsSet); \
+    AddDumpFunction(Scan, PropsGet, nano_unsigned_int32, nano_unsigned_int32, nano_unsigned_int32, nano_int, nano_string, nano_int, nano_string); \
+    AddDumpFunction(Scan, SpeedSet); \
+    AddDumpFunction(Scan, SpeedGet, nano_float32, nano_float32, nano_float32, nano_float32, nano_unsigned_int16, nano_float32); \
+    AddDumpFunction(Scan, FrameDataGrab, nano_int, nano_string, nano_int, nano_int, nano_2D_array_float32, nano_unsigned_int32);
+
+#define AddDumpFolMeFunctions \
+    AddDumpFunction(FolMe, XYPosSet); \
+    AddDumpFunction(FolMe, XYPosGet, nano_float64, nano_float64); \
+    AddDumpFunction(FolMe, SpeedSet); \
+    AddDumpFunction(FolMe, SpeedGet, nano_float32, nano_unsigned_int32); \
+    AddDumpFunction(FolMe, OversamplSet); \
+    AddDumpFunction(FolMe, OversamplGet, nano_int, nano_float32); \
+    AddDumpFunction(FolMe, Stop); \
+    AddDumpFunction(FolMe, PSOnOffGet, nano_unsigned_int32); \
+    AddDumpFunction(FolMe, PSOnOffSet); \
+    AddDumpFunction(FolMe, PSExpGet, nano_unsigned_int16, nano_int, nano_int, nano_1D_array_string); \
+    AddDumpFunction(FolMe, PSExpSet); \
+    AddDumpFunction(FolMe, PSPropsGet, nano_unsigned_int32, nano_unsigned_int32, nano_int, nano_string, nano_int, nano_string, nano_float32); \
+    AddDumpFunction(FolMe, PSPropsSet);
+
+#define AddDumpTipRecFunctions \
+    AddDumpFunction(TipRec, BufferSizeSet); \
+    AddDumpFunction(TipRec, BufferSizeGet, nano_int); \
+    AddDumpFunction(TipRec, BufferClear); \
+    AddDumpFunction(TipRec, DataGet, nano_int, nano_1D_array_int, nano_int, nano_int, nano_2D_array_float32); \
+    AddDumpFunction(TipRec, DataSave);
+
+#define AddDumpPatternFunctions \
+    AddDumpFunction(Pattern, ExpOpen); \
+    AddDumpFunction(Pattern, ExpStart); \
+    AddDumpFunction(Pattern, ExpPause); \
+    AddDumpFunction(Pattern, ExpStop); \
+    AddDumpFunction(Pattern, ExpStatusGet, nano_unsigned_int32); \
+    AddDumpFunction(Pattern, GridSet); \
+    AddDumpFunction(Pattern, GridGet, nano_int, nano_int, nano_float32, nano_float32, nano_float32, nano_float32, nano_float32); \
+    AddDumpFunction(Pattern, LineSet); \
+    AddDumpFunction(Pattern, LineGet, nano_int, nano_float32, nano_float32, nano_float32, nano_float32); \
+    AddDumpFunction(Pattern, CloudSet); \
+    AddDumpFunction(Pattern, CloudGet, nano_int, nano_1D_array_float32, nano_1D_array_float32); \
+    AddDumpFunction(Pattern, PropsSet); \
+    AddDumpFunction(Pattern, PropsGet, nano_int, nano_int, nano_1D_array_string, nano_int, nano_string, nano_int, nano_string, nano_float32, nano_unsigned_int32);
+
+#define AddDumpMarksFunctions \
+    AddDumpFunction(Marks, PointDraw); \
+    AddDumpFunction(Marks, PointsDraw); \
+    AddDumpFunction(Marks, LineDraw); \
+    AddDumpFunction(Marks, LinesDraw); \
+    AddDumpFunction(Marks, PointsErase); \
+    AddDumpFunction(Marks, LinesErase); \
+    AddDumpFunction(Marks, PointsVisibleSet); \
+    AddDumpFunction(Marks, LinesVisibleSet); \
+    AddDumpFunction(Marks, PointsGet, nano_int, nano_1D_array_float32, nano_1D_array_float32, nano_int, nano_1D_array_string, nano_1D_array_unsigned_int32, nano_1D_array_unsigned_int32); \
+    AddDumpFunction(Marks, LinesGet, nano_int, nano_1D_array_float32, nano_1D_array_float32, nano_1D_array_float32, nano_1D_array_float32, nano_1D_array_unsigned_int32, nano_1D_array_unsigned_int32);
+
+#define AddDumpTipShaperFunctions \
+    AddDumpFunction(TipShaper, Start); \
+    AddDumpFunction(TipShaper, PropsSet); \
+    AddDumpFunction(TipShaper, PropsGet, nano_float32, nano_unsigned_int32, nano_float32, nano_float32, nano_float32, nano_float32, nano_float32, nano_float32, nano_float32, nano_float32, nano_unsigned_int32);
+
+#define AddDumpMotorFunctions \
+    AddDumpFunction(Motor, StartMove); \
+    AddDumpFunction(Motor, StartClosedLoop); \
+    AddDumpFunction(Motor, StopMove); \
+    AddDumpFunction(Motor, PosGet, nano_float64, nano_float64, nano_float64); \
+    AddDumpFunction(Motor, StepCounterGet, nano_int, nano_int, nano_int); \
+    AddDumpFunction(Motor, FreqAmpGet, nano_float32, nano_float32); \
+    AddDumpFunction(Motor, FreqAmpSet);
+
+#define AddDumpGenSwpFunctions \
+    AddDumpFunction(GenSwp, AcqChsSet); \
+    AddDumpFunction(GenSwp, AcqChsGet, nano_int, nano_1D_array_int); \
+    AddDumpFunction(GenSwp, SwpSignalSet); \
+    AddDumpFunction(GenSwp, SwpSignalGet, nano_int, nano_string, nano_int, nano_int, nano_1D_array_string); \
+    AddDumpFunction(GenSwp, LimitsSet); \
+    AddDumpFunction(GenSwp, LimitsGet, nano_float32, nano_float32); \
+    AddDumpFunction(GenSwp, PropsSet); \
+    AddDumpFunction(GenSwp, PropsGet, nano_float32, nano_float32, nano_int, nano_unsigned_int16, nano_unsigned_int32, nano_unsigned_int32, nano_float32); \
+    AddDumpFunction(GenSwp, Start, nano_int, nano_int, nano_1D_array_string, nano_int, nano_int, nano_2D_array_float32); \
+    AddDumpFunction(GenSwp, Stop); \
+    AddDumpFunction(GenSwp, Open);
+
+#define AddDumpGenPICtrlFunctions \
+    AddDumpFunction(GenPICtrl, OnOffSet); \
+    AddDumpFunction(GenPICtrl, OnOffGet, nano_unsigned_int32); \
+    AddDumpFunction(GenPICtrl, AOValSet); \
+    AddDumpFunction(GenPICtrl, AOValGet, nano_float32); \
+    AddDumpFunction(GenPICtrl, AOPropsSet); \
+    AddDumpFunction(GenPICtrl, AOPropsGet, nano_int, nano_string, nano_int, nano_string, nano_float32, nano_float32, nano_float32, nano_float32); \
+    AddDumpFunction(GenPICtrl, ModChSet); \
+    AddDumpFunction(GenPICtrl, ModChGet, nano_int); \
+    AddDumpFunction(GenPICtrl, DemodChSet); \
+    AddDumpFunction(GenPICtrl, DemodChGet, nano_int); \
+    AddDumpFunction(GenPICtrl, PropsSet); \
+    AddDumpFunction(GenPICtrl, PropsGet, nano_float32, nano_float32, nano_float32, nano_unsigned_int16);
+
+#define AddDumpAtomTrackFunctions \
+    AddDumpFunction(AtomTrack, CtrlSet); \
+    AddDumpFunction(AtomTrack, StatusGet, nano_unsigned_int16); \
+    AddDumpFunction(AtomTrack, PropsSet); \
+    AddDumpFunction(AtomTrack, PropsGet, nano_float32, nano_float32, nano_float32, nano_float32, nano_float32); \
+    AddDumpFunction(AtomTrack, QuickCompStart); \
+    AddDumpFunction(AtomTrack, DriftComp);
+
+#define AddDumpLockInFunctions \
+    AddDumpFunction(LockIn, ModOnOffSet, nano_int); \
+    AddDumpFunction(LockIn, ModOnOffGet, nano_int, nano_unsigned_int32); \
+    AddDumpFunction(LockIn, ModSignalSet, nano_int); \
+    AddDumpFunction(LockIn, ModSignalGet, nano_int, nano_int); \
+    AddDumpFunction(LockIn, ModPhasRegSet, nano_int); \
+    AddDumpFunction(LockIn, ModPhasRegGet, nano_int, nano_int); \
+    AddDumpFunction(LockIn, ModHarmonicSet, nano_int); \
+    AddDumpFunction(LockIn, ModHarmonicGet, nano_int, nano_int); \
+    AddDumpFunction(LockIn, ModPhasSet, nano_int); \
+    AddDumpFunction(LockIn, ModPhasGet, nano_int, nano_float32); \
+    AddDumpFunction(LockIn, ModAmpSet, nano_int); \
+    AddDumpFunction(LockIn, ModAmpGet, nano_int, nano_float32); \
+    AddDumpFunction(LockIn, ModPhasFreqSet, nano_int); \
+    AddDumpFunction(LockIn, ModPhasFreqGet, nano_int, nano_float32); \
+    AddDumpFunction(LockIn, DemodSignalSet, nano_int); \
+    AddDumpFunction(LockIn, DemodSignalGet, nano_int, nano_int); \
+    AddDumpFunction(LockIn, DemodHarmonicSet, nano_int); \
+    AddDumpFunction(LockIn, DemodHarmonicGet, nano_int, nano_int); \
+    AddDumpFunction(LockIn, DemodHPFilterSet, nano_int); \
+    AddDumpFunction(LockIn, DemodHPFilterGet, nano_int, nano_int, nano_float32); \
+    AddDumpFunction(LockIn, DemodLPFilterSet, nano_int); \
+    AddDumpFunction(LockIn, DemodLPFilterGet, nano_int, nano_int, nano_float32); \
+    AddDumpFunction(LockIn, DemodPhasRegSet, nano_int); \
+    AddDumpFunction(LockIn, DemodPhasRegGet, nano_int, nano_int); \
+    AddDumpFunction(LockIn, DemodPhasSet, nano_int); \
+    AddDumpFunction(LockIn, DemodPhasGet, nano_int, nano_float32); \
+    AddDumpFunction(LockIn, DemodSyncFilterSet, nano_int); \
+    AddDumpFunction(LockIn, DemodSyncFilterGet, nano_int, nano_unsigned_int32); \
+    AddDumpFunction(LockIn, DemodRTSignalsSet, nano_int); \
+    AddDumpFunction(LockIn, DemodRTSignalsGet, nano_int, nano_unsigned_int32);
+
+// Not updated
+#define AddDumpLockInFreqSwpFunctions \
+    AddDumpFunction(LockInFreqSwp, Open); \
+    AddDumpFunction(LockInFreqSwp, Start, nano_unsigned_int32, nano_unsigned_int32); \
+    AddDumpFunction(LockInFreqSwp, SignalSet, nano_int); \
+    AddDumpFunction(LockInFreqSwp, SignalGet); \
+    AddDumpFunction(LockInFreqSwp, LimitsSet, nano_float32, nano_float32); \
+    AddDumpFunction(LockInFreqSwp, LimitsGet); \
+    AddDumpFunction(LockInFreqSwp, PropsSet, nano_unsigned_int16, nano_unsigned_int16, nano_float32, nano_unsigned_int16, nano_float32, nano_unsigned_int32, nano_unsigned_int32, nano_int, nano_string); \
+    AddDumpFunction(LockInFreqSwp, PropsGet);
+
+#define AddDumpPLLFunctions \
+    AddDumpFunction(PLL, InpCalibrSet, nano_int, nano_float32); \
+    AddDumpFunction(PLL, InpCalibrGet, nano_int); \
+    AddDumpFunction(PLL, InpRangeSet, nano_int, nano_float32); \
+    AddDumpFunction(PLL, InpRangeGet, nano_int); \
+    AddDumpFunction(PLL, InpPropsSet, nano_int, nano_unsigned_int16, nano_unsigned_int16); \
+    AddDumpFunction(PLL, InpPropsGet, nano_int); \
+    AddDumpFunction(PLL, AddOnOffSet, nano_int, nano_unsigned_int32); \
+    AddDumpFunction(PLL, AddOnOffGet, nano_int); \
+    AddDumpFunction(PLL, OutOnOffSet, nano_int, nano_unsigned_int32); \
+    AddDumpFunction(PLL, OutOnOffGet, nano_int); \
+    AddDumpFunction(PLL, ExcRangeSet, nano_int, nano_unsigned_int16); \
+    AddDumpFunction(PLL, ExcRangeGet, nano_int); \
+    AddDumpFunction(PLL, ExcitationSet, nano_int, nano_float32); \
+    AddDumpFunction(PLL, ExcitationGet, nano_int); \
+    AddDumpFunction(PLL, AmpCtrlSetpntSet, nano_int, nano_float32); \
+    AddDumpFunction(PLL, AmpCtrlSetpntGet, nano_int); \
+    AddDumpFunction(PLL, AmpCtrlOnOffSet, nano_int, nano_unsigned_int32); \
+    AddDumpFunction(PLL, AmpCtrlOnOffGet, nano_int); \
+    AddDumpFunction(PLL, AmpCtrlGainSet, nano_int, nano_float32, nano_float32); \
+    AddDumpFunction(PLL, AmpCtrlGainGet, nano_int); \
+    AddDumpFunction(PLL, AmpCtrlBandwidthSet, nano_int, nano_float32); \
+    AddDumpFunction(PLL, AmpCtrlBandwidthGet, nano_int); \
+    AddDumpFunction(PLL, PhasCtrlOnOffSet, nano_int, nano_unsigned_int32); \
+    AddDumpFunction(PLL, PhasCtrlOnOffGet, nano_int); \
+    AddDumpFunction(PLL, PhasCtrlGainSet, nano_int, nano_float32, nano_float32); \
+    AddDumpFunction(PLL, PhasCtrlGainGet, nano_int); \
+    AddDumpFunction(PLL, PhasCtrlBandwidthSet, nano_int, nano_float32); \
+    AddDumpFunction(PLL, PhasCtrlBandwidthGet, nano_int); \
+    AddDumpFunction(PLL, FreqRangeSet, nano_int, nano_float32); \
+    AddDumpFunction(PLL, FreqRangeGet, nano_int); \
+    AddDumpFunction(PLL, CenterFreqSet, nano_int, nano_float64); \
+    AddDumpFunction(PLL, CenterFreqGet, nano_int); \
+    AddDumpFunction(PLL, FreqShiftSet, nano_int, nano_float32); \
+    AddDumpFunction(PLL, FreqShiftGet, nano_int); \
+    AddDumpFunction(PLL, FreqShiftAutoCenter, nano_int); \
+    AddDumpFunction(PLL, FreqExcOverwriteSet, nano_int, nano_int, nano_int); \
+    AddDumpFunction(PLL, FreqExcOverwriteGet, nano_int); \
+    AddDumpFunction(PLL, DemodInputSet, nano_unsigned_int16, nano_unsigned_int16, nano_unsigned_int16); \
+    AddDumpFunction(PLL, DemodInputGet, nano_unsigned_int16); \
+    AddDumpFunction(PLL, DemodHarmonicSet, nano_unsigned_int16, nano_unsigned_int16); \
+    AddDumpFunction(PLL, DemodHarmonicGet, nano_unsigned_int16); \
+    AddDumpFunction(PLL, DemodPhasRefSet, nano_unsigned_int16, nano_float32); \
+    AddDumpFunction(PLL, DemodPhasRefGet, nano_unsigned_int16); \
+    AddDumpFunction(PLL, DemodFilterSet, nano_unsigned_int16, nano_unsigned_int16); \
+    AddDumpFunction(PLL, DemodFilterGet, nano_unsigned_int16);
+
+#define AddDumpPLLQCtrlFunctions \
+    AddDumpFunction(PLLQCtrl, AccessRequest, nano_unsigned_int32); \
+    AddDumpFunction(PLLQCtrl, AccessGet); \
+    AddDumpFunction(PLLQCtrl, OnOffSet, nano_unsigned_int32); \
+    AddDumpFunction(PLLQCtrl, OnOffGet); \
+    AddDumpFunction(PLLQCtrl, QGainSet, nano_float32); \
+    AddDumpFunction(PLLQCtrl, QGainGet); \
+    AddDumpFunction(PLLQCtrl, PhaseSet, nano_int, nano_float32); \
+    AddDumpFunction(PLLQCtrl, PhaseGet);
+
+#define AddDumpPLLFreqSwpFunctions \
+    AddDumpFunction(PLLFreqSwp, Open, nano_int); \
+    AddDumpFunction(PLLFreqSwp, ParamsSet, nano_int, nano_int, nano_float32, nano_float32); \
+    AddDumpFunction(PLLFreqSwp, ParamsGet, nano_int); \
+    AddDumpFunction(PLLFreqSwp, Start, nano_int, nano_unsigned_int32, nano_unsigned_int32); \
+    AddDumpFunction(PLLFreqSwp, Stop, nano_int);
+
+#define AddDumpPLLPhasSwpFunctions \
+    AddDumpFunction(PLLPhasSwp, Start, nano_int, nano_unsigned_int32); \
+    AddDumpFunction(PLLPhasSwp, Stop, nano_int);
+
+#define AddDumpPLLSignalAnlzrFunctions \
+    AddDumpFunction(PLLSignalAnlzr, Open); \
+    AddDumpFunction(PLLSignalAnlzr, ChSet, nano_int); \
+    AddDumpFunction(PLLSignalAnlzr, ChGet); \
+    AddDumpFunction(PLLSignalAnlzr, TimebaseSet, nano_int, nano_int); \
+    AddDumpFunction(PLLSignalAnlzr, TimebaseGet); \
+    AddDumpFunction(PLLSignalAnlzr, TrigAuto); \
+    AddDumpFunction(PLLSignalAnlzr, TrigRearm); \
+    AddDumpFunction(PLLSignalAnlzr, TrigSet, nano_unsigned_int16, nano_int, nano_unsigned_int16, nano_float64, nano_float64, nano_unsigned_int16); \
+    AddDumpFunction(PLLSignalAnlzr, TrigGet); \
+    AddDumpFunction(PLLSignalAnlzr, OsciDataGet); \
+    AddDumpFunction(PLLSignalAnlzr, FFTPropsSet, nano_unsigned_int16, nano_unsigned_int16, nano_unsigned_int16, nano_int); \
+    AddDumpFunction(PLLSignalAnlzr, FFTPropsGet); \
+    AddDumpFunction(PLLSignalAnlzr, FFTAvgRestart); \
+    AddDumpFunction(PLLSignalAnlzr, FFTDataGet);
+
+#define AddDumpPLLZoomFFTFunctions \
+    AddDumpFunction(PLLZoomFFT, Open); \
+    AddDumpFunction(PLLZoomFFT, ChSet, nano_int); \
+    AddDumpFunction(PLLZoomFFT, ChGet); \
+    AddDumpFunction(PLLZoomFFT, AvgRestart); \
+    AddDumpFunction(PLLZoomFFT, PropsSet, nano_unsigned_int16, nano_unsigned_int16, nano_unsigned_int16, nano_int); \
+    AddDumpFunction(PLLZoomFFT, PropsGet); \
+    AddDumpFunction(PLLZoomFFT, DataGet);
+
+#define AddDumpOCSyncFunctions \
+    AddDumpFunction(OCSync, AnglesSet, nano_float32, nano_float32, nano_float32, nano_float32); \
+    AddDumpFunction(OCSync, AnglesGet); \
+    AddDumpFunction(OCSync, LinkAnglesSet, nano_unsigned_int32, nano_unsigned_int32); \
+    AddDumpFunction(OCSync, LinkAnglesGet);
+
+#define AddDumpScriptFunctions \
+    AddDumpFunction(Script, Load, nano_int, nano_string, nano_unsigned_int32); \
+    AddDumpFunction(Script, Save, nano_int, nano_string, nano_unsigned_int32); \
+    AddDumpFunction(Script, Deploy, nano_int); \
+    AddDumpFunction(Script, Undeploy, nano_int); \
+    AddDumpFunction(Script, Run, nano_int, nano_unsigned_int32); \
+    AddDumpFunction(Script, Stop); \
+    AddDumpFunction(Script, ChsGet, nano_unsigned_int16); \
+    AddDumpFunction(Script, ChsSet, nano_unsigned_int16, nano_int, nano_1D_array_int); \
+    AddDumpFunction(Script, DataGet, nano_unsigned_int16, nano_int); \
+    AddDumpFunction(Script, Autosave, nano_unsigned_int16, nano_int, nano_unsigned_int32);
+
+#define AddDumpInterfFunctions \
+    AddDumpFunction(Interf, CtrlOnOffSet, nano_unsigned_int32); \
+    AddDumpFunction(Interf, CtrlOnOffGet); \
+    AddDumpFunction(Interf, CtrlPropsSet, nano_float32, nano_float32, nano_unsigned_int32); \
+    AddDumpFunction(Interf, CtrlPropsGet); \
+    AddDumpFunction(Interf, WPiezoSet, nano_float32); \
+    AddDumpFunction(Interf, WPiezoGet); \
+    AddDumpFunction(Interf, ValGet); \
+    AddDumpFunction(Interf, CtrlCalibrOpen); \
+    AddDumpFunction(Interf, CtrlReset); \
+    AddDumpFunction(Interf, CtrlNullDefl);
+
+#define AddDumpLaserFunctions \
+    AddDumpFunction(Laser, OnOffSet, nano_unsigned_int32); \
+    AddDumpFunction(Laser, OnOffGet); \
+    AddDumpFunction(Laser, PropsSet, nano_float32); \
+    AddDumpFunction(Laser, PropsGet); \
+    AddDumpFunction(Laser, PowerGet);
+
+#define AddDumpBeamDeflFunctions \
+    AddDumpFunction(BeamDefl, HorConfigSet, nano_int, nano_string, nano_int, nano_string, nano_float32, nano_float32); \
+    AddDumpFunction(BeamDefl, HorConfigGet); \
+    AddDumpFunction(BeamDefl, VerConfigSet, nano_int, nano_string, nano_int, nano_string, nano_float32, nano_float32); \
+    AddDumpFunction(BeamDefl, VerConfigGet); \
+    AddDumpFunction(BeamDefl, IntConfigSet, nano_int, nano_string, nano_int, nano_string, nano_float32, nano_float32); \
+    AddDumpFunction(BeamDefl, IntConfigGet); \
+    AddDumpFunction(BeamDefl, AutoOffset, nano_unsigned_int16);
+
+#define AddDumpSignalsFunctions \
+    AddDumpFunction(Signals, NamesGet); \
+    AddDumpFunction(Signals, InSlotSet, nano_int, nano_int); \
+    AddDumpFunction(Signals, InSlotsGet); \
+    AddDumpFunction(Signals, CalibrGet, nano_int); \
+    AddDumpFunction(Signals, RangeGet, nano_int); \
+    AddDumpFunction(Signals, ValGet, nano_int, nano_unsigned_int32); \
+    AddDumpFunction(Signals, ValsGet, nano_int, nano_1D_array_int, nano_unsigned_int32); \
+    AddDumpFunction(Signals, MeasNamesGet); \
+    AddDumpFunction(Signals, AddRTGet); \
+    AddDumpFunction(Signals, AddRTSet, nano_int, nano_int);
+
+#define AddDumpUserInFunctions \
+    AddDumpFunction(UserIn, CalibrSet, nano_int, nano_int, nano_float32);
+
+#define AddDumpUserOutFunctions \
+    AddDumpFunction(UserOut, ModeSet, nano_int, nano_unsigned_int16); \
+    AddDumpFunction(UserOut, ModeGet, nano_int); \
+    AddDumpFunction(UserOut, MonitorChSet, nano_int, nano_int); \
+    AddDumpFunction(UserOut, MonitorChGet, nano_int); \
+    AddDumpFunction(UserOut, ValSet, nano_int, nano_float32); \
+    AddDumpFunction(UserOut, CalibrSet, nano_int, nano_float32, nano_float32); \
+    AddDumpFunction(UserOut, CalcSignalNameSet, nano_int, nano_int, nano_string); \
+    AddDumpFunction(UserOut, CalcSignalNameGet, nano_int); \
+    AddDumpFunction(UserOut, CalcSignalConfigSet, nano_int, nano_unsigned_int16, nano_unsigned_int16, nano_unsigned_int16); \
+    AddDumpFunction(UserOut, CalcSignalConfigGet, nano_int); \
+    AddDumpFunction(UserOut, LimitsSet, nano_int, nano_float32, nano_float32); \
+    AddDumpFunction(UserOut, LimitsGet, nano_int);
+
+#define AddDumpDigLinesFunctions \
+    AddDumpFunction(DigLines, PropsSet, nano_unsigned_int32, nano_unsigned_int32, nano_unsigned_int32, nano_unsigned_int32); \
+    AddDumpFunction(DigLines, OutStatusSet, nano_unsigned_int32, nano_unsigned_int32, nano_unsigned_int32); \
+    AddDumpFunction(DigLines, TTLValGet, nano_unsigned_int16); \
+    AddDumpFunction(DigLines, Pulse, nano_unsigned_int16, nano_int, nano_1D_array_unsigned_int8, nano_float32, nano_float32, nano_int, nano_unsigned_int32);
+
+#define AddDumpDataLogFunctions \
+    AddDumpFunction(DataLog, Open); \
+    AddDumpFunction(DataLog, Start); \
+    AddDumpFunction(DataLog, Stop); \
+    AddDumpFunction(DataLog, StatusGet); \
+    AddDumpFunction(DataLog, ChsSet, nano_int, nano_1D_array_int); \
+    AddDumpFunction(DataLog, ChsGet); \
+    AddDumpFunction(DataLog, PropsSet, nano_unsigned_int16, nano_int, nano_int, nano_float32, nano_int, nano_int, nano_string, nano_int, nano_string, nano_int, nano_int, nano_1D_array_string); \
+    AddDumpFunction(DataLog, PropsGet);
+
+#define AddDumpTCPLogFunctions \
+    AddDumpFunction(TCPLog, Start); \
+    AddDumpFunction(TCPLog, Stop); \
+    AddDumpFunction(TCPLog, ChsSet, nano_int, nano_1D_array_int); \
+    AddDumpFunction(TCPLog, OversamplSet, nano_int); \
+    AddDumpFunction(TCPLog, StatusGet);
+
+#define AddDumpOsciHRFunctions \
+    AddDumpFunction(OsciHR, ChSet, nano_int); \
+    AddDumpFunction(OsciHR, ChGet); \
+    AddDumpFunction(OsciHR, OversamplSet, nano_int); \
+    AddDumpFunction(OsciHR, OversamplGet); \
+    AddDumpFunction(OsciHR, CalibrModeSet, nano_unsigned_int16); \
+    AddDumpFunction(OsciHR, CalibrModeGet); \
+    AddDumpFunction(OsciHR, SamplesSet, nano_int); \
+    AddDumpFunction(OsciHR, SamplesGet); \
+    AddDumpFunction(OsciHR, PreTrigSet, nano_unsigned_int32, nano_float64); \
+    AddDumpFunction(OsciHR, PreTrigGet); \
+    AddDumpFunction(OsciHR, Run); \
+    AddDumpFunction(OsciHR, OsciDataGet, nano_unsigned_int16, nano_float64); \
+    AddDumpFunction(OsciHR, TrigModeSet, nano_unsigned_int16); \
+    AddDumpFunction(OsciHR, TrigModeGet); \
+    AddDumpFunction(OsciHR, TrigLevChSet, nano_int); \
+    AddDumpFunction(OsciHR, TrigLevChGet); \
+    AddDumpFunction(OsciHR, TrigLevValSet, nano_float64); \
+    AddDumpFunction(OsciHR, TrigLevValGet); \
+    AddDumpFunction(OsciHR, TrigLevHystSet, nano_float64); \
+    AddDumpFunction(OsciHR, TrigLevHystGet); \
+    AddDumpFunction(OsciHR, TrigLevSlopeSet, nano_unsigned_int16); \
+    AddDumpFunction(OsciHR, TrigLevSlopeGet); \
+    AddDumpFunction(OsciHR, TrigDigChSet, nano_int); \
+    AddDumpFunction(OsciHR, TrigDigChGet); \
+    AddDumpFunction(OsciHR, TrigArmModeSet, nano_unsigned_int16); \
+    AddDumpFunction(OsciHR, TrigArmModeGet); \
+    AddDumpFunction(OsciHR, TrigDigSlopeSet, nano_unsigned_int16); \
+    AddDumpFunction(OsciHR, TrigDigSlopeGet); \
+    AddDumpFunction(OsciHR, TrigRearm); \
+    AddDumpFunction(OsciHR, PSDShow, nano_unsigned_int32); \
+    AddDumpFunction(OsciHR, PSDWeightSet, nano_unsigned_int16); \
+    AddDumpFunction(OsciHR, PSDWeightGet); \
+    AddDumpFunction(OsciHR, PSDWindowSet, nano_unsigned_int16); \
+    AddDumpFunction(OsciHR, PSDWindowGet); \
+    AddDumpFunction(OsciHR, PSDAvrgTypeSet, nano_unsigned_int16); \
+    AddDumpFunction(OsciHR, PSDAvrgTypeGet); \
+    AddDumpFunction(OsciHR, PSDAvrgCountSet, nano_int); \
+    AddDumpFunction(OsciHR, PSDAvrgCountGet); \
+    AddDumpFunction(OsciHR, PSDAvrgRestart); \
+    AddDumpFunction(OsciHR, PSDDataGet, nano_unsigned_int16, nano_float64);
+
+#define AddDumpOsci1TFunctions \
+    AddDumpFunction(Osci1T, ChSet, nano_int); \
+    AddDumpFunction(Osci1T, ChGet); \
+    AddDumpFunction(Osci1T, TimebaseSet, nano_int); \
+    AddDumpFunction(Osci1T, TimebaseGet); \
+    AddDumpFunction(Osci1T, TrigSet, nano_unsigned_int16, nano_unsigned_int16, nano_float64, nano_float64); \
+    AddDumpFunction(Osci1T, TrigGet); \
+    AddDumpFunction(Osci1T, Run); \
+    AddDumpFunction(Osci1T, DataGet, nano_unsigned_int16);
+
+#define AddDumpOsci2TFunctions \
+    AddDumpFunction(Osci2T, ChsSet, nano_int, nano_int); \
+    AddDumpFunction(Osci2T, ChsGet); \
+    AddDumpFunction(Osci2T, TimebaseSet, nano_unsigned_int16); \
+    AddDumpFunction(Osci2T, TimebaseGet); \
+    AddDumpFunction(Osci2T, OversamplSet, nano_unsigned_int16); \
+    AddDumpFunction(Osci2T, OversamplGet); \
+    AddDumpFunction(Osci2T, TrigSet, nano_unsigned_int16, nano_unsigned_int16, nano_unsigned_int16, nano_float64, nano_float64, nano_float64); \
+    AddDumpFunction(Osci2T, TrigGet); \
+    AddDumpFunction(Osci2T, Run); \
+    AddDumpFunction(Osci2T, DataGet, nano_unsigned_int16);
+
+#define AddDumpSignalChartFunctions \
+    AddDumpFunction(SignalChart, Open); \
+    AddDumpFunction(SignalChart, ChsSet, nano_int, nano_int); \
+    AddDumpFunction(SignalChart, ChsGet);
+
+#define AddDumpSpectrumAnlzrFunctions \
+    AddDumpFunction(SpectrumAnlzr, ChSet, nano_int, nano_int); \
+    AddDumpFunction(SpectrumAnlzr, ChGet, nano_int); \
+    AddDumpFunction(SpectrumAnlzr, FreqRangeSet, nano_int, nano_int); \
+    AddDumpFunction(SpectrumAnlzr, FreqRangeGet, nano_int); \
+    AddDumpFunction(SpectrumAnlzr, FreqResSet, nano_int, nano_unsigned_int16); \
+    AddDumpFunction(SpectrumAnlzr, FreqResGet, nano_int); \
+    AddDumpFunction(SpectrumAnlzr, FFTWindowSet, nano_int, nano_unsigned_int16); \
+    AddDumpFunction(SpectrumAnlzr, FFTWindowGet, nano_int); \
+    AddDumpFunction(SpectrumAnlzr, AveragSet, nano_int, nano_unsigned_int16, nano_unsigned_int16, nano_unsigned_int32); \
+    AddDumpFunction(SpectrumAnlzr, AveragGet, nano_int); \
+    AddDumpFunction(SpectrumAnlzr, ACCouplingSet, nano_int, nano_unsigned_int32); \
+    AddDumpFunction(SpectrumAnlzr, ACCouplingGet, nano_int); \
+    AddDumpFunction(SpectrumAnlzr, CursorPosSet, nano_int, nano_unsigned_int16, nano_float64, nano_float64); \
+    AddDumpFunction(SpectrumAnlzr, CursorPosGet, nano_int, nano_unsigned_int16); \
+    AddDumpFunction(SpectrumAnlzr, BandRMSGet, nano_int); \
+    AddDumpFunction(SpectrumAnlzr, DCGet, nano_int); \
+    AddDumpFunction(SpectrumAnlzr, Run, nano_int); \
+    AddDumpFunction(SpectrumAnlzr, DataGet, nano_int);
+
+#define AddDumpFunGen1ChFunctions \
+    AddDumpFunction(FunGen1Ch, Start, nano_int); \
+    AddDumpFunction(FunGen1Ch, Stop); \
+    AddDumpFunction(FunGen1Ch, StatusGet); \
+    AddDumpFunction(FunGen1Ch, PropsSet, nano_float32, nano_float32, nano_unsigned_int16, nano_unsigned_int16); \
+    AddDumpFunction(FunGen1Ch, PropsGet); \
+    AddDumpFunction(FunGen1Ch, IdleSet, nano_float32); \
+    AddDumpFunction(FunGen1Ch, IdleGet);
+
+#define AddDumpFunGen2ChFunctions \
+    AddDumpFunction(FunGen2Ch, Start, nano_int); \
+    AddDumpFunction(FunGen2Ch, Stop); \
+    AddDumpFunction(FunGen2Ch, StatusGet); \
+    AddDumpFunction(FunGen2Ch, IdleSet, nano_int, nano_float32); \
+    AddDumpFunction(FunGen2Ch, IdleGet, nano_int); \
+    AddDumpFunction(FunGen2Ch, OnOffSet, nano_int, nano_unsigned_int32); \
+    AddDumpFunction(FunGen2Ch, OnOffGet, nano_int); \
+    AddDumpFunction(FunGen2Ch, SignalSet, nano_int, nano_int); \
+    AddDumpFunction(FunGen2Ch, SignalGet, nano_int); \
+    AddDumpFunction(FunGen2Ch, PropsSet, nano_int, nano_float32, nano_float32, nano_unsigned_int16, nano_unsigned_int16, nano_unsigned_int16); \
+    AddDumpFunction(FunGen2Ch, PropsGet, nano_int); \
+    AddDumpFunction(FunGen2Ch, WaveformSet, nano_int, nano_unsigned_int16); \
+    AddDumpFunction(FunGen2Ch, WaveformGet, nano_int);
+
+#define AddDumpUtilFunctions \
+    AddDumpFunction(Util, SessionPathGet); \
+    AddDumpFunction(Util, SettingsLoad, nano_int, nano_string, nano_unsigned_int32); \
+    AddDumpFunction(Util, SettingsSave, nano_int, nano_string, nano_unsigned_int32); \
+    AddDumpFunction(Util, LayoutLoad, nano_int, nano_string, nano_unsigned_int32); \
+    AddDumpFunction(Util, LayoutSave, nano_int, nano_string, nano_unsigned_int32); \
+    AddDumpFunction(Util, Lock); \
+    AddDumpFunction(Util, UnLock); \
+    AddDumpFunction(Util, RTFreqSet, nano_float32); \
+    AddDumpFunction(Util, RTFreqGet); \
+    AddDumpFunction(Util, AcqPeriodSet, nano_float32); \
+    AddDumpFunction(Util, AcqPeriodGet); \
+    AddDumpFunction(Util, RTOversamplSet, nano_int); \
+    AddDumpFunction(Util, RTOversamplGet); \
+    AddDumpFunction(Util, Quit, nano_unsigned_int32, nano_int, nano_string, nano_int, nano_string, nano_unsigned_int32);
+
 #define AddWholeFunctions \
     AddBiasFunctions; \
     AddBiasSwpFunctions; \
     AddBiasSpectrFunctions; \
     AddKelvinCtrlFunctions; \
-    AddPDCompFunctions; \
+    AddCPDCompFunctions; \
     AddCurrentFunctions; \
     AddZCtrlFunctions; \
     AddSafeTipFunctions; \
@@ -2260,6 +3414,54 @@
     AddSpectrumAnlzrFunctions; \
     AddFunGen1ChFunctions; \
     AddFunGen2ChFunctions; \
-    AddUtilFunctions;
+    AddUtilFunctions; \
+    AddDumpBiasFunctions; \
+    AddDumpBiasSwpFunctions; \
+    AddDumpBiasSpectrFunctions; \
+    AddDumpKelvinCtrlFunctions; \
+    AddDumpCPDCompFunctions; \
+    AddDumpCurrentFunctions; \
+    AddDumpZCtrlFunctions; \
+    AddDumpSafeTipFunctions; \
+    AddDumpAutoApproachFunctions; \
+    AddDumpZSpectrFunctions; \
+    AddDumpPiezoFunctions; \
+    AddDumpScanFunctions; \
+    AddDumpFolMeFunctions; \
+    AddDumpTipRecFunctions; \
+    AddDumpPatternFunctions; \
+    AddDumpMarksFunctions; \
+    AddDumpTipShaperFunctions; \
+    AddDumpMotorFunctions; \
+    AddDumpGenSwpFunctions; \
+    AddDumpGenPICtrlFunctions; \
+    AddDumpAtomTrackFunctions; \
+    AddDumpLockInFunctions; \
+    AddDumpLockInFreqSwpFunctions; \
+    AddDumpPLLFunctions; \
+    AddDumpPLLQCtrlFunctions; \
+    AddDumpPLLFreqSwpFunctions; \
+    AddDumpPLLPhasSwpFunctions; \
+    AddDumpPLLSignalAnlzrFunctions; \
+    AddDumpPLLZoomFFTFunctions; \
+    AddDumpOCSyncFunctions; \
+    AddDumpScriptFunctions; \
+    AddDumpInterfFunctions; \
+    AddDumpLaserFunctions; \
+    AddDumpBeamDeflFunctions; \
+    AddDumpSignalsFunctions; \
+    AddDumpUserInFunctions; \
+    AddDumpUserOutFunctions; \
+    AddDumpDigLinesFunctions; \
+    AddDumpDataLogFunctions; \
+    AddDumpTCPLogFunctions; \
+    AddDumpOsciHRFunctions; \
+    AddDumpOsci1TFunctions; \
+    AddDumpOsci2TFunctions; \
+    AddDumpSignalChartFunctions; \
+    AddDumpSpectrumAnlzrFunctions; \
+    AddDumpFunGen1ChFunctions; \
+    AddDumpFunGen2ChFunctions; \
+    AddDumpUtilFunctions;
     
 #endif // MACRO_H

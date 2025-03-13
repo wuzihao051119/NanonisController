@@ -27,13 +27,16 @@ public:
     Function &function() const { return m_function; }
 
     void invoke(const std::string &commandName, std::vector<std::string> &args);
-    void makeHeader(const std::string &commandName, const int &bodySize);
-
+    const std::string dump(const std::string &response);
+    
 signals:
     void socketSend(const QByteArray& data);
-
+    
 private:
+    void makeHeader(const std::string &commandName, const int &bodySize);
+
     std::unordered_map<std::string, std::function<void(std::vector<std::string> &)>> m_command;
+    std::unordered_map<std::string, std::function<void(const std::string &, size_t *offset)>> m_dumpCommand;
     Function &m_function;
     bool m_sendResponseBack;
     std::ostringstream &m_oss;

@@ -23,7 +23,7 @@ public slots:
     void receiveData();
 
 signals:
-    void dataAvailable();
+    void dataAvailable(const QByteArray &data);
 };
 
 #endif // SOCKET_H

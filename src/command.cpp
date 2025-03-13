@@ -8,6 +8,7 @@
 
 Command::Command(Function &function, std::ostringstream &oss) : m_function(function), m_oss(oss), m_sendResponseBack(true) {
     AddCommands;
+    AddDumpCommands;
 }
 
 void Command::invoke(const std::string &commandName, std::vector<std::string> &args) {
@@ -31,4 +32,22 @@ void Command::makeHeader(const std::string &commandName, const int &bodySize) {
     nano_unsigned_int16 sendResponseBack(m_sendResponseBack);
     nano_unsigned_int16 notUsed(0);
     m_oss << std::setfill('\0') << std::left << std::setw(32) << commandName << size << sendResponseBack << notUsed;
+}
+
+const std::string Command::dump(const std::string &response) {
+    std::string commandName = response.substr(0, 32);
+    int bodySize = std::stoi(response.substr(32, 4));
+    int notUsed = std::stoi(response.substr(36, 4));
+
+    size_t offset = 40;
+    m_dumpCommand.at(commandName)(response, &offset);
+
+    int errorStatus = std::stoi(response.substr(offset, 4));
+    int errorDescriptionSize = std::stoi(response.substr(offset + 4, 4));
+    std::string errorDescription = response.substr(offset + 8);
+
+    m_oss.str("");
+    m_oss << commandName << " " << bodySize << " " << errorStatus << " " << errorDescriptionSize << " " << errorDescription;
+
+    return m_oss.str();
 }

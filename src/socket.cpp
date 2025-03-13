@@ -23,6 +23,6 @@ void Socket::sendData(const QByteArray &data) {
 void Socket::receiveData() {
     if (bytesAvailable() != 0) {
         m_receiveData = readAll();
-        emit dataAvailable();
+        emit dataAvailable(m_receiveData);
     }
 }

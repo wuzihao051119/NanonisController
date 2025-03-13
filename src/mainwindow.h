@@ -32,6 +32,7 @@ signals:
 private slots:
     void getHostAddress();
     void invokeCommand();
+    void getResponse(const QByteArray &data);
 
 private:
     void initUi();
