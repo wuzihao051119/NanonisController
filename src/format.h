@@ -89,35 +89,45 @@ struct convertFromHex<nano_string> {
 template <>
 struct convertFromHex<nano_int> {
     const std::string operator()(const std::string &str, size_t offset) {
-        return std::to_string(*reinterpret_cast<const int *>(str.substr(offset, 4).c_str()));
+        std::string content = str.substr(offset, 4);
+        std::reverse(content.begin(), content.end());
+        return std::to_string(*reinterpret_cast<const int *>(content.c_str()));
     }
 };
 
 template <>
 struct convertFromHex<nano_unsigned_int16> {
     const std::string operator()(const std::string &str, size_t offset) {
-        return std::to_string(*reinterpret_cast<const uint16_t*>(str.substr(offset, 2).c_str()));
+        std::string content = str.substr(offset, 2);
+        std::reverse(content.begin(), content.end());
+        return std::to_string(*reinterpret_cast<const uint16_t*>(content.c_str()));
     }
 };
 
 template <>
 struct convertFromHex<nano_unsigned_int32> {
     const std::string operator()(const std::string &str, size_t offset) {
-        return std::to_string(*reinterpret_cast<const uint32_t*>(str.substr(offset, 4).c_str()));
+        std::string content = str.substr(offset, 4);
+        std::reverse(content.begin(), content.end());
+        return std::to_string(*reinterpret_cast<const uint32_t*>(content.c_str()));
     }
 };
 
 template <>
 struct convertFromHex<nano_float32> {
     const std::string operator()(const std::string &str, size_t offset) {
-        return std::to_string(*reinterpret_cast<const float*>(str.substr(offset, 4).c_str()));
+        std::string content = str.substr(offset, 4);
+        std::reverse(content.begin(), content.end());
+        return std::to_string(*reinterpret_cast<const float*>(content.c_str()));
     }
 };
 
 template <>
 struct convertFromHex<nano_float64> {
     const std::string operator()(const std::string &str, size_t offset) {
-        return std::to_string(*reinterpret_cast<const double*>(str.substr(offset, 8).c_str()));
+        std::string content = str.substr(offset, 8);
+        std::reverse(content.begin(), content.end());
+        return std::to_string(*reinterpret_cast<const double*>(content.c_str()));
     }
 };
 

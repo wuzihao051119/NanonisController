@@ -35,18 +35,19 @@ void Command::makeHeader(const std::string &commandName, const int &bodySize) {
 }
 
 const std::string Command::dump(const std::string &response) {
-    std::string commandName = response.substr(0, 32);
-    int bodySize = std::stoi(response.substr(32, 4));
-    int notUsed = std::stoi(response.substr(36, 4));
+    m_oss.str("");
+
+    std::string commandName = response.substr(0, 32).c_str();
+    int bodySize = std::stoi(convertFromHex<nano_unsigned_int32>()(response, 32));
+    int notUsed = std::stoi(convertFromHex<nano_unsigned_int32>()(response, 36));
 
     size_t offset = 40;
     m_dumpCommand.at(commandName)(response, &offset);
 
-    int errorStatus = std::stoi(response.substr(offset, 4));
-    int errorDescriptionSize = std::stoi(response.substr(offset + 4, 4));
+    int errorStatus = std::stoi(convertFromHex<nano_unsigned_int32>()(response, offset));
+    int errorDescriptionSize = std::stoi(convertFromHex<nano_unsigned_int32>()(response, offset + 4));
     std::string errorDescription = response.substr(offset + 8);
 
-    m_oss.str("");
     m_oss << commandName << " " << bodySize << " " << errorStatus << " " << errorDescriptionSize << " " << errorDescription;
 
     return m_oss.str();

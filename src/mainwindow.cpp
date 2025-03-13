@@ -69,9 +69,10 @@ void MainWindow::getHostAddress() {
 void MainWindow::invokeCommand() {
     m_tclWrapper.eval(commandLineEdit->text().toLatin1());
     commandTextEdit->appendPlainText(m_tclWrapper.getResult());
+    commandLineEdit->clear();
 }
 
 void MainWindow::getResponse(const QByteArray &data) {
-    const std::string response = m_command.dump(data.toStdString());
-    commandTextEdit->appendPlainText(QString::fromStdString(response));
+    const std::string response = m_command.dump(std::string(data.constData(), data.length()));
+    commandTextEdit->appendPlainText(response.c_str());
 }
